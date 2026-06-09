@@ -1,0 +1,20 @@
+# Entornos virtuales locales
+venv/
+.venv/
+env/
+
+# Archivos de configuración con secretos
+.env
+.env.local
+.env.*.local
+
+# Docker local data (si existiera localmente)
+pgdata/
+
+# IDEs
+.idea/
+.vscode/
+
+# Logs y temporales
+*.log
+.DS_Store

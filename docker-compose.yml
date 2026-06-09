@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: phishing_quiz_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER:-admin}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-Sistemas1.}
+      POSTGRES_DB: ${DB_NAME:-phishing_quiz}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./PPS_Backend
+      dockerfile: Dockerfile
+    container_name: phishing_quiz_backend
+    restart: always
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql://${DB_USER:-admin}:${DB_PASSWORD:-Sistemas1.}@${DB_HOST:-db}:5432/${DB_NAME:-phishing_quiz}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost}
+      - BACKEND_URL=${BACKEND_URL:-http://localhost:8000}
+    depends_on:
+      - db
+    # Ejecuta automáticamente las migraciones pendientes antes de iniciar Uvicorn
+    command: sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"
+
+  frontend:
+    build:
+      context: ./PPS_Frontend
+      dockerfile: Dockerfile
+      args:
+        # URL pública del backend para las llamadas de la API desde el navegador del cliente
+        - VITE_API_URL=${VITE_API_URL:-http://localhost:8000}
+    container_name: phishing_quiz_frontend
+    restart: always
+    ports:
+      - "${FRONTEND_PORT:-80}:80"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
