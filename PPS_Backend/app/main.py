@@ -27,6 +27,30 @@ app = FastAPI(
     version="1.0.0"
 )
 
+@app.on_event("startup")
+def startup_db_seed():
+    db = next(get_db())
+    try:
+        superadmins = [e.strip().lower() for e in settings.SUPERADMIN_EMAILS.split(",") if e.strip()]
+        for email in superadmins:
+            user = crud.get_user_by_email(db, email=email)
+            if not user:
+                db_user = models.User(
+                    email=email,
+                    nombre="SuperAdmin Inicial",
+                    rol="SUPERADMIN",
+                    debe_cambiar_password=False
+                )
+                db.add(db_user)
+                db.commit()
+                logger.info(f"SuperAdmin inicial creado: {email}")
+            elif user.rol != "SUPERADMIN":
+                user.rol = "SUPERADMIN"
+                db.commit()
+                logger.info(f"Usuario existente actualizado a SuperAdmin: {email}")
+    except Exception as e:
+        logger.error("Error durante el sembrado inicial de base de datos", exc_info=True)
+
 # ==========================
 # MIDDLEWARES
 # ==========================
@@ -91,15 +115,20 @@ async def auth_callback(request: Request, db: Session = Depends(get_db)):
     # Buscar si el usuario ya existe
     user = crud.get_user_by_email(db, email=email)
     
+    superadmins = [e.strip().lower() for e in settings.SUPERADMIN_EMAILS.split(",") if e.strip()]
+    
     # Si no existe, lo creamos dinámicamente
     if not user:
         company = crud.get_company_by_domain(db, dominio=dominio)
         company_id = company.id if company else None
         
+        # Asignar rol SUPERADMIN si el email está en la lista del .env
+        rol = "SUPERADMIN" if email.lower() in superadmins else "EMPLEADO"
+        
         new_user = schemas.UserCreate(
             email=email,
             nombre=nombre,
-            rol="EMPLEADO",
+            rol=rol,
             company_id=company_id,
             password=None
         )
@@ -112,7 +141,12 @@ async def auth_callback(request: Request, db: Session = Depends(get_db)):
         # ✨ Y AQUÍ: Si ya existía pero entró con Google, también se la apagamos
         if user.debe_cambiar_password:
             user.debe_cambiar_password = False
-            db.commit()
+            
+        # Si ya existe pero su email se agregó después a la lista de superadmins, lo actualizamos
+        if email.lower() in superadmins and user.rol != "SUPERADMIN":
+            user.rol = "SUPERADMIN"
+            
+        db.commit()
     
     # Generar nuestro propio JWT con el ID y el ROL
     access_token = create_access_token(data={"sub": str(user.id), "rol": user.rol})
