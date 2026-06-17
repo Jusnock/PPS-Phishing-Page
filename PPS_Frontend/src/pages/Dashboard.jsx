@@ -14,15 +14,17 @@ export default function Dashboard() {
   const [busqueda, setBusqueda] = useState('');
   const [filtroRiesgo, setFiltroRiesgo] = useState('TODOS');
   const [seccionActual, setSeccionActual] = useState('QUIZ');
+  const [empresaSeleccionada, setEmpresaSeleccionada] = useState(null);
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    cargarDashboard();
+    cargarDashboard(null);
   }, []);
 
-  const cargarDashboard = async () => {
+  const cargarDashboard = async (companyId = null) => {
     try {
+      setCargando(true);
       const resUser = await api.get('/users/me');
       setUsuario(resUser.data);
 
@@ -31,7 +33,11 @@ export default function Dashboard() {
         return;
       }
 
-      const resStats = await api.get('/stats/dashboard');
+      const url = companyId 
+        ? `/stats/dashboard?company_id=${companyId}` 
+        : '/stats/dashboard';
+
+      const resStats = await api.get(url);
       setDatos(resStats.data);
       setCargando(false);
     } catch (err) {
@@ -59,7 +65,7 @@ export default function Dashboard() {
   // ============================================================================
   // VISTA 1: SUPERADMIN (Look Institucional y Moderno)
   // ============================================================================
-  if (usuario?.rol === 'SUPERADMIN' && Array.isArray(datos)) {
+  if (usuario?.rol === 'SUPERADMIN' && Array.isArray(datos) && !empresaSeleccionada) {
     
     const empresasFiltradas = datos.filter(emp => 
       emp.empresa_nombre.toLowerCase().includes(busquedaEmpresa.toLowerCase()) ||
@@ -145,12 +151,13 @@ export default function Dashboard() {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse table-auto">
                 <thead>
-                  <tr className="bg-blue-50 text-xs text-slate-600 uppercase tracking-wider">
-                    <th className="px-6 py-4 font-bold">Institución</th>
+                  <tr className="bg-slate-50 border-b border-slate-200 text-xs text-slate-600 uppercase tracking-wider">
+                    <th className="px-6 py-4 font-bold text-left">Institución</th>
                     <th className="px-6 py-4 font-bold text-center">Evaluados</th>
                     <th className="px-6 py-4 font-bold text-center">Partidas</th>
                     <th className="px-6 py-4 font-bold text-left min-w-[200px]">Acierto Promedio</th>
                     <th className="px-6 py-4 font-bold text-center">Estado General</th>
+                    <th className="px-6 py-4 font-bold text-right">Reportes</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-sm">
@@ -198,12 +205,23 @@ export default function Dashboard() {
                             </span>
                           )}
                         </td>
+                        <td className="px-6 py-5 text-right">
+                          <button 
+                            onClick={() => {
+                              setEmpresaSeleccionada(emp);
+                              cargarDashboard(emp.empresa_id);
+                            }}
+                            className="text-xs font-semibold px-3 py-1.5 rounded-md text-cpce-blue bg-white border border-cpce-blue hover:bg-slate-50 transition-colors shadow-sm cursor-pointer"
+                          >
+                            Ver Detalles
+                          </button>
+                        </td>
                       </tr>
                     )
                   })}
                   {empresasFiltradas.length === 0 && (
                     <tr>
-                      <td colSpan="5" className="px-6 py-12 text-center text-slate-500 text-sm font-medium">No se encontraron instituciones.</td>
+                      <td colSpan="6" className="px-6 py-12 text-center text-slate-500 text-sm font-medium">No se encontraron instituciones.</td>
                     </tr>
                   )}
                 </tbody>
@@ -218,7 +236,7 @@ export default function Dashboard() {
   // ============================================================================
   // VISTA 2: ADMIN EMPRESA (Look Institucional y Moderno)
   // ============================================================================
-  if (usuario?.rol === 'ADMIN_EMPRESA' && datos?.empleados) {
+  if ((usuario?.rol === 'ADMIN_EMPRESA' || empresaSeleccionada) && datos?.empleados) {
 
     const exportarCSV = () => {
       const cabeceras = ["ID,Nombre,Email,Estado de Riesgo,Aciertos (%),Tiempo Promedio (s)"];
@@ -278,10 +296,23 @@ export default function Dashboard() {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 pb-5 border-b border-slate-200 gap-4 print:full-width">
             <div>
               <h1 className="text-3xl font-extrabold text-slate-950 tracking-tight">Reporte de Auditoría de Ciberseguridad</h1>
-              <p className="text-base font-medium text-slate-600 mt-1.5 font-semibold">Métricas de concientización y resiliencia del personal (CPCE Mendoza).</p>
+              <p className="text-base font-medium text-slate-600 mt-1.5 font-semibold">
+                Métricas de concientización y resiliencia del personal ({empresaSeleccionada ? empresaSeleccionada.empresa_nombre : 'CPCE Mendoza'}).
+              </p>
             </div>
             
             <div className="flex gap-3 print:hidden">
+              {empresaSeleccionada && (
+                <button 
+                  onClick={() => {
+                    setEmpresaSeleccionada(null);
+                    cargarDashboard(null);
+                  }}
+                  className="inline-flex items-center justify-center px-4 py-2.5 text-sm font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors shadow-sm cursor-pointer"
+                >
+                  Volver al Monitor Global
+                </button>
+              )}
               {seccionActual === 'QUIZ' ? (
                 <button 
                   onClick={exportarCSV} 

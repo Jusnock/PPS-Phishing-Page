@@ -7,6 +7,7 @@ export default function Gestion() {
   const [empresas, setEmpresas] = useState([]);
   const [empleados, setEmpleados] = useState([]); 
   const [cargando, setCargando] = useState(true);
+  const [mostrarConsolaLocal, setMostrarConsolaLocal] = useState(false);
 
   // --- Sistema de Notificaciones Elegantes ---
   const [toast, setToast] = useState({ visible: false, mensaje: '', tipo: 'exito' });
@@ -59,12 +60,14 @@ export default function Gestion() {
       setUsuario(resUser.data);
 
       if (resUser.data.rol === 'SUPERADMIN') {
-        const [resEmpresas, resUsers] = await Promise.all([
+        const [resEmpresas, resUsers, resTargets] = await Promise.all([
           api.get('/companies/'),
-          api.get('/users/')
+          api.get('/users/'),
+          api.get('/targets/')
         ]);
         setEmpresas(resEmpresas.data);
         setEmpleados(resUsers.data); 
+        setTargets(resTargets.data);
       } else if (resUser.data.rol === 'ADMIN_EMPRESA') {
         const [resUsers, resTargets] = await Promise.all([
           api.get('/users/'),
@@ -350,10 +353,18 @@ export default function Gestion() {
     </>
   );
 
+  const empleadosVisibles = (usuario?.rol === 'SUPERADMIN' && !mostrarConsolaLocal)
+    ? empleados
+    : empleados.filter(u => u.company_id === usuario?.company_id && u.rol !== 'SUPERADMIN');
+
+  const targetsVisibles = (usuario?.rol === 'SUPERADMIN' && !mostrarConsolaLocal)
+    ? targets
+    : targets.filter(t => t.company_id === usuario?.company_id);
+
   // ==========================================
   // VISTA: SUPER-ADMIN
   // ==========================================
-  if (usuario?.rol === 'SUPERADMIN') {
+  if (usuario?.rol === 'SUPERADMIN' && !mostrarConsolaLocal) {
     const adminsDeEmpresaActual = empresaActual 
       ? empleados.filter(u => u.company_id === empresaActual.id && u.rol === 'ADMIN_EMPRESA')
       : [];
@@ -368,13 +379,26 @@ export default function Gestion() {
             <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Directorio de Instituciones</h1>
             <p className="text-sm text-slate-500 mt-1">Gestión global de clientes y dominios autorizados.</p>
           </div>
-          <button 
-            onClick={() => setModalCrearEmpresa(true)}
-            className="inline-flex items-center justify-center px-4 py-2.5 text-sm font-semibold text-white bg-cpce-blue rounded-md hover:bg-cpce-dark transition-colors shadow-sm cursor-pointer"
-          >
-            <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-            Nueva Institución
-          </button>
+          <div className="flex flex-wrap gap-3">
+            {usuario?.company_id && (
+              <button 
+                onClick={() => {
+                  setTabActual('EMPLEADOS');
+                  setMostrarConsolaLocal(true);
+                }}
+                className="inline-flex items-center justify-center px-4 py-2.5 text-sm font-semibold text-cpce-blue bg-white border border-cpce-blue rounded-md hover:bg-slate-50 transition-colors shadow-sm cursor-pointer"
+              >
+                Ver Consola Local (Consejo)
+              </button>
+            )}
+            <button 
+              onClick={() => setModalCrearEmpresa(true)}
+              className="inline-flex items-center justify-center px-4 py-2.5 text-sm font-semibold text-white bg-cpce-blue rounded-md hover:bg-cpce-dark transition-colors shadow-sm cursor-pointer"
+            >
+              <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+              Nueva Institución
+            </button>
+          </div>
         </div>
 
         {/* Tabla Ancho Completo */}
@@ -574,12 +598,24 @@ export default function Gestion() {
 
       {/* Tabs Principales para Admin Empresa */}
       <div className="mb-8 border-b border-slate-200 pb-2">
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight mb-2">
-          Consola de Gestión Institucional
-        </h1>
-        <p className="text-sm text-slate-500 mb-6">
-          Administra las credenciales de acceso para las evaluaciones interactivas y la nómina de destinatarios para las simulaciones de correo.
-        </p>
+        <div className="flex justify-between items-start flex-col sm:flex-row gap-4 mb-4">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900 tracking-tight mb-2">
+              Consola de Gestión Institucional
+            </h1>
+            <p className="text-sm text-slate-500">
+              Administra las credenciales de acceso para las evaluaciones interactivas y la nómina de destinatarios para las simulaciones de correo.
+            </p>
+          </div>
+          {usuario?.rol === 'SUPERADMIN' && (
+            <button 
+              onClick={() => setMostrarConsolaLocal(false)}
+              className="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-cpce-blue bg-white border border-cpce-blue rounded-md hover:bg-slate-50 transition-colors shadow-sm cursor-pointer shrink-0"
+            >
+              Volver a Vista Global
+            </button>
+          )}
+        </div>
 
         <div className="flex space-x-6">
           <button 
@@ -636,10 +672,10 @@ export default function Gestion() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-sm">
-                  {empleados.length === 0 ? (
+                  {empleadosVisibles.length === 0 ? (
                     <tr><td colSpan="3" className="px-6 py-16 text-center text-slate-500 text-sm">Aún no hay empleados registrados en tu organización.</td></tr>
                   ) : (
-                    empleados.map(emp => (
+                    empleadosVisibles.map(emp => (
                       <tr key={emp.id} className="hover:bg-slate-50/80 transition-colors group">
                         <td className="px-6 py-4 font-semibold text-slate-900 flex items-center gap-3">
                           <div className="h-8 w-8 rounded-md bg-blue-50 border border-blue-100 flex items-center justify-center text-cpce-blue font-bold text-xs">
@@ -714,10 +750,10 @@ export default function Gestion() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-sm">
-                  {targets.length === 0 ? (
+                  {targetsVisibles.length === 0 ? (
                     <tr><td colSpan="4" className="px-6 py-16 text-center text-slate-500 text-sm">No hay destinatarios registrados. Importa un CSV (Formato: Nombre,Email,Departamento) o agrega uno manualmente.</td></tr>
                   ) : (
-                    targets.map(t => (
+                    targetsVisibles.map(t => (
                       <tr key={t.id} className="hover:bg-slate-50/80 transition-colors group">
                         <td className="px-6 py-4 font-semibold text-slate-900 flex items-center gap-3">
                           <div className="h-8 w-8 rounded-md bg-blue-50 border border-blue-100 flex items-center justify-center text-cpce-blue font-bold text-xs">

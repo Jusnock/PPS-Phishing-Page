@@ -213,8 +213,9 @@ def delete_company(company_id: int, db: Session = Depends(get_db), current_user:
 # ==========================================
 @app.post("/users/", response_model=schemas.UserResponse, tags=["Usuarios"])
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_admin_empresa)):
-    if current_user.rol == "ADMIN_EMPRESA":
+    if current_user.rol == "ADMIN_EMPRESA" or (current_user.rol == "SUPERADMIN" and user.company_id is None):
         user.company_id = current_user.company_id
+    if current_user.rol == "ADMIN_EMPRESA":
         if user.rol == "SUPERADMIN":
             raise HTTPException(status_code=403, detail="No puedes crear un SuperAdmin.")
             
@@ -413,7 +414,7 @@ def read_users_me(current_user: models.User = Depends(get_current_user)):
 # ==========================================
 @app.post("/targets/", response_model=schemas.TargetResponse, tags=["Destinatarios de Simulación"])
 def create_target(target: schemas.TargetCreate, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_admin_empresa)):
-    if current_user.rol == "ADMIN_EMPRESA":
+    if current_user.rol == "ADMIN_EMPRESA" or (current_user.rol == "SUPERADMIN" and target.company_id is None):
         target.company_id = current_user.company_id
     db_target = crud.get_target_by_email(db, email=target.email, company_id=target.company_id)
     if db_target:
@@ -447,7 +448,7 @@ def delete_target(target_id: int, db: Session = Depends(get_db), current_user: m
 # ==========================================
 @app.post("/campaigns/", response_model=schemas.CampaignResponse, tags=["Campañas de Simulación"])
 def create_campaign(campaign: schemas.CampaignCreate, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_admin_empresa)):
-    if current_user.rol == "ADMIN_EMPRESA":
+    if current_user.rol == "ADMIN_EMPRESA" or (current_user.rol == "SUPERADMIN" and campaign.company_id is None):
         campaign.company_id = current_user.company_id
     
     db_scenario = db.query(models.Scenario).filter(models.Scenario.id == campaign.scenario_id).first()

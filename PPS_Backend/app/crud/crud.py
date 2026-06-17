@@ -293,6 +293,7 @@ def get_superadmin_dashboard_stats(db: Session):
         
         if not user_ids:
             resultado.append({
+                "empresa_id": emp.id,
                 "empresa_nombre": emp.nombre,
                 "dominio": emp.dominio_google,
                 "empleados": 0,
@@ -300,13 +301,14 @@ def get_superadmin_dashboard_stats(db: Session):
                 "tasa_acierto": 0.0,
                 "riesgo": 0.0
             })
-            continue 
+            continue
             
         sesiones = db.query(models.QuizSession.id).filter(models.QuizSession.user_id.in_(user_ids)).all()
         session_ids = [s.id for s in sesiones]
         
         if not session_ids:
             resultado.append({
+                "empresa_id": emp.id,
                 "empresa_nombre": emp.nombre,
                 "dominio": emp.dominio_google,
                 "empleados": len(user_ids),
@@ -325,6 +327,7 @@ def get_superadmin_dashboard_stats(db: Session):
             acierto = round((aciertos / len(respuestas)) * 100, 1)
             
         resultado.append({
+            "empresa_id": emp.id,
             "empresa_nombre": emp.nombre,
             "dominio": emp.dominio_google,
             "empleados": len(user_ids),
