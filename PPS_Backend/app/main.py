@@ -91,14 +91,15 @@ oauth.register(
 @app.get("/login", tags=["Autenticación"])
 async def login_via_google(request: Request):
     """Inicia el flujo de login con Google"""
-    redirect_uri = request.url_for('auth_callback')
+    redirect_uri = f"{settings.BACKEND_URL.rstrip('/')}/auth/callback"
     return await oauth.google.authorize_redirect(request, redirect_uri)
 
 @app.get("/auth/callback", tags=["Autenticación"])
 async def auth_callback(request: Request, db: Session = Depends(get_db)):
     """Atrapa la respuesta de Google, crea el usuario si no existe y genera el Token"""
     try:
-        token = await oauth.google.authorize_access_token(request)
+        redirect_uri = f"{settings.BACKEND_URL.rstrip('/')}/auth/callback"
+        token = await oauth.google.authorize_access_token(request, redirect_uri=redirect_uri)
     except Exception as e:
         logger.error("Error de autenticación con Google", exc_info=True)
         raise HTTPException(status_code=400, detail=f"Error de autenticación con Google: {e}")
