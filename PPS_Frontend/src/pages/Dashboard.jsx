@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend, Cell } from 'recharts';
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
+
 
 
 export default function Dashboard() {
@@ -266,9 +267,16 @@ export default function Dashboard() {
 
       const docWidth = doc.internal.pageSize.getWidth();
       const docHeight = doc.internal.pageSize.getHeight();
-      const simStats = datos.simulacion || {
-        total_destinatarios: 0, total_enviados: 0, total_abiertos: 0, total_clics: 0, ctr_global: 0.0,
-        campanas: [], departamentos: [], ultimos_eventos: []
+      
+      const simStats = {
+        total_destinatarios: datos.simulacion?.total_destinatarios || 0,
+        total_enviados: datos.simulacion?.total_enviados || 0,
+        total_abiertos: datos.simulacion?.total_abiertos || 0,
+        total_clics: datos.simulacion?.total_clics || 0,
+        ctr_global: datos.simulacion?.ctr_global || 0.0,
+        campanas: datos.simulacion?.campanas || [],
+        departamentos: datos.simulacion?.departamentos || [],
+        ultimos_eventos: datos.simulacion?.ultimos_eventos || []
       };
 
       // Helper to draw header
@@ -460,7 +468,7 @@ export default function Dashboard() {
         emp.estado
       ]);
 
-      doc.autoTable({
+      autoTable(doc, {
         startY: 55,
         head: [['Nombre', 'Email', 'Aciertos', 'Tiempo Promedio', 'Nivel de Riesgo']],
         body: tableBodyQuiz,
@@ -507,7 +515,7 @@ export default function Dashboard() {
         `${c.ctr}%`
       ]);
 
-      doc.autoTable({
+      autoTable(doc, {
         startY: 50,
         head: [['Campaña de Simulación', 'Enviados', 'Abiertos', 'Clics', 'Tasa Clics (CTR)']],
         body: tableBodyCampanas,
@@ -556,7 +564,7 @@ export default function Dashboard() {
         e.ip || "N/A"
       ]);
 
-      doc.autoTable({
+      autoTable(doc, {
         startY: currentY + 10,
         head: [['Fecha / Hora', 'Destinatario', 'Campaña', 'Evento', 'IP']],
         body: tableBodyEventos,
