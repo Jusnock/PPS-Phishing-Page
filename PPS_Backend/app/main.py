@@ -321,7 +321,35 @@ def create_quiz(quiz: schemas.QuizCreate, db: Session = Depends(get_db), current
 @app.get("/quizzes/", response_model=List[schemas.QuizResponse], tags=["Quizzes (Campañas)"])
 def read_quizzes(db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     company_id = current_user.company_id if current_user.rol != "SUPERADMIN" else None
-    return crud.get_quizzes(db, company_id=company_id)
+    quizzes = crud.get_quizzes(db, company_id=company_id)
+    
+    if current_user.rol == "EMPLEADO":
+        import random
+        # Buscamos todas las preguntas (escenarios) de la empresa o globales
+        preguntas_disponibles = crud.get_scenarios(db, company_id=company_id)
+        
+        response_quizzes = []
+        for q in quizzes:
+            # Mezclamos y tomamos 10 aleatorias para este intento
+            preguntas_temp = list(preguntas_disponibles)
+            random.shuffle(preguntas_temp)
+            preguntas_seleccionadas = preguntas_temp[:10]
+            
+            # Construimos un schema de respuesta temporal sin modificar la DB
+            q_response = schemas.QuizResponse(
+                id=q.id,
+                titulo=q.titulo,
+                descripcion=q.descripcion,
+                activo=q.activo,
+                fecha_creacion=q.fecha_creacion,
+                company_id=q.company_id,
+                scenarios=preguntas_seleccionadas
+            )
+            response_quizzes.append(q_response)
+        return response_quizzes
+        
+    return quizzes
+
 
 @app.put("/quizzes/{quiz_id}", response_model=schemas.QuizResponse, tags=["Quizzes (Campañas)"])
 def update_quiz(quiz_id: int, quiz: schemas.QuizCreate, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_admin_empresa)):

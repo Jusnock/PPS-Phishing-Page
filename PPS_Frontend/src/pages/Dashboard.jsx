@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend, Cell } from 'recharts';
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
+
 
 export default function Dashboard() {
   const [usuario, setUsuario] = useState(null);
@@ -254,6 +257,336 @@ export default function Dashboard() {
       document.body.removeChild(link);
     };
 
+    const exportarPDF = () => {
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      const docWidth = doc.internal.pageSize.getWidth();
+      const docHeight = doc.internal.pageSize.getHeight();
+      const simStats = datos.simulacion || {
+        total_destinatarios: 0, total_enviados: 0, total_abiertos: 0, total_clics: 0, ctr_global: 0.0,
+        campanas: [], departamentos: [], ultimos_eventos: []
+      };
+
+      // Helper to draw header
+      const drawHeader = (title) => {
+        // Background bar for the title
+        doc.setFillColor(10, 79, 159); // CPCE Blue #0A4F9F
+        doc.rect(0, 0, docWidth, 35, 'F');
+
+        // Title text
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(18);
+        doc.setFont('helvetica', 'bold');
+        doc.text(title.toUpperCase(), 15, 18);
+
+        // Subtitle
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.text("Plataforma de Simulación de Phishing (PPS) - CPCE Mendoza", 15, 26);
+      };
+
+      // Helper to draw footer
+      const drawFooter = (pageNumber, totalPages) => {
+        doc.setDrawColor(226, 232, 240); // slate-200
+        doc.line(15, docHeight - 15, docWidth - 15, docHeight - 15);
+
+        doc.setTextColor(148, 163, 184); // slate-400
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.text("Reporte de Auditoría Confidencial", 15, docHeight - 10);
+        doc.text(`Página ${pageNumber} de ${totalPages}`, docWidth - 15, docHeight - 10, { align: 'right' });
+      };
+
+      // --- PAGE 1: EXECUTIVE SUMMARY ---
+      drawHeader("Reporte de Auditoría de Ciberseguridad");
+
+      // Title metadata
+      doc.setTextColor(30, 41, 59); // slate-800
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.text("Institución / Empresa:", 15, 48);
+      doc.setFont('helvetica', 'normal');
+      doc.text(empresaSeleccionada ? empresaSeleccionada.empresa_nombre : "CPCE Mendoza", 60, 48);
+
+      doc.setFont('helvetica', 'bold');
+      doc.text("Fecha del Reporte:", 15, 54);
+      doc.setFont('helvetica', 'normal');
+      doc.text(new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }), 60, 54);
+
+      doc.setFont('helvetica', 'bold');
+      doc.text("Generado por:", 15, 60);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`${usuario?.nombre || 'Administrador'} (${usuario?.rol || 'ADMIN'})`, 60, 60);
+
+      doc.setDrawColor(226, 232, 240);
+      doc.line(15, 66, docWidth - 15, 66);
+
+      // Section 1: Quiz Metrics (Card)
+      doc.setFillColor(248, 250, 252); // slate-50
+      doc.rect(15, 72, docWidth - 30, 42, 'F');
+      doc.setDrawColor(226, 232, 240);
+      doc.rect(15, 72, docWidth - 30, 42, 'S');
+
+      doc.setTextColor(10, 79, 159); // CPCE Blue
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text("MÉTRICAS DE ENTRENAMIENTO (QUIZ DE CONCIENTIZACIÓN)", 20, 80);
+
+      doc.setTextColor(71, 85, 105); // slate-600
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.text("Personal Evaluado:", 20, 90);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`${totalEmpleados} empleados`, 65, 90);
+
+      doc.setFont('helvetica', 'bold');
+      doc.text("Tasa de Acierto Promedio:", 20, 97);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`${promedioAciertos}%`, 65, 97);
+
+      doc.setFont('helvetica', 'bold');
+      doc.text("Tiempo de Respuesta Promedio:", 20, 104);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`${promedioTiempo} segundos`, 65, 104);
+
+      // Section 2: SMTP Metrics (Card)
+      doc.setFillColor(248, 250, 252); // slate-50
+      doc.rect(15, 122, docWidth - 30, 48, 'F');
+      doc.setDrawColor(226, 232, 240);
+      doc.rect(15, 122, docWidth - 30, 48, 'S');
+
+      doc.setTextColor(10, 79, 159); // CPCE Blue
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text("MÉTRICAS DE CAMPAÑAS SMTP (SIMULACROS REALES)", 20, 130);
+
+      doc.setTextColor(71, 85, 105); // slate-600
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.text("Nómina de Destinatarios:", 20, 140);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`${simStats.total_destinatarios} registrados`, 70, 140);
+
+      doc.setFont('helvetica', 'bold');
+      doc.text("Simulacros Enviados:", 20, 146);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`${simStats.total_enviados} correos`, 70, 146);
+
+      doc.setFont('helvetica', 'bold');
+      doc.text("Aperturas de Correo:", 20, 152);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`${simStats.total_abiertos} (${simStats.total_enviados > 0 ? Math.round((simStats.total_abiertos / simStats.total_enviados) * 100) : 0}% de apertura)`, 70, 152);
+
+      doc.setFont('helvetica', 'bold');
+      doc.text("Tasa Clics Global (CTR):", 20, 158);
+      
+      // CTR Color coding
+      const ctrVal = simStats.ctr_global;
+      if (ctrVal >= 30) {
+        doc.setTextColor(239, 68, 68); // Red-500
+      } else if (ctrVal >= 10) {
+        doc.setTextColor(245, 158, 11); // Amber-500
+      } else {
+        doc.setTextColor(16, 185, 129); // Emerald-500
+      }
+      doc.setFont('helvetica', 'bold');
+      doc.text(`${ctrVal}% (Riesgo de acceso a enlaces)`, 70, 158);
+
+      // Section 3: Diagnostic Assessment Box
+      doc.setTextColor(30, 41, 59);
+      doc.setFillColor(255, 255, 255);
+      doc.rect(15, 178, docWidth - 30, 38, 'F');
+      
+      // Assessment status
+      let diagnosticColor = [16, 185, 129]; // Emerald
+      let diagnosticText = "PROTEGIDO - El personal demuestra altos índices de alerta ante correos sospechosos.";
+      let descriptionText = "La tasa global de aciertos supera el 80% y los clics en enlaces simulados son mínimos. Se recomienda mantener capacitaciones periódicas para conservar este nivel de alerta corporativo.";
+
+      if (promedioAciertos < 50 || ctrVal >= 30) {
+        diagnosticColor = [239, 68, 68]; // Red
+        diagnosticText = "EN RIESGO CRÍTICO - Nivel de vulnerabilidad alto. Acciones requeridas.";
+        descriptionText = "Se detecta una propensión alarmante a ingresar a enlaces de phishing y/o bajo rendimiento en el quiz interactivo. Es fundamental realizar talleres presenciales y campañas dirigidas urgentes.";
+      } else if (promedioAciertos < 80 || ctrVal >= 10) {
+        diagnosticColor = [245, 158, 11]; // Amber
+        diagnosticText = "VULNERABLE - Nivel de alerta medio. Se requiere supervisión y refuerzo.";
+        descriptionText = "El personal identifica algunos correos sospechosos pero una porción significativa sigue accediendo a enlaces simulados. Se sugiere reforzar los conceptos clave de detección en el área administrativa.";
+      }
+
+      doc.setDrawColor(diagnosticColor[0], diagnosticColor[1], diagnosticColor[2]);
+      doc.setLineWidth(1);
+      doc.rect(15, 178, docWidth - 30, 38, 'S');
+
+      doc.setFillColor(diagnosticColor[0], diagnosticColor[1], diagnosticColor[2]);
+      doc.rect(16, 179, docWidth - 32, 8, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.text(diagnosticText, 20, 185);
+
+      doc.setTextColor(71, 85, 105);
+      doc.setFontSize(9.5);
+      doc.setFont('helvetica', 'normal');
+      
+      // Split description text to wrap correctly
+      const splitDescription = doc.splitTextToSize(descriptionText, docWidth - 40);
+      doc.text(splitDescription, 20, 194);
+
+      drawFooter(1, 3);
+
+      // --- PAGE 2: CONCIENTIZACIÓN DETALLADA (QUIZ) ---
+      doc.addPage();
+      drawHeader("Detalle del Quiz de Concientización");
+
+      doc.setTextColor(30, 41, 59);
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text("RENDIMIENTO INDIVIDUAL DEL PERSONAL", 15, 45);
+
+      doc.setTextColor(100, 116, 139);
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.text("Lista de empleados evaluados en la plataforma con sus respectivas estadísticas de acierto y tiempo de respuesta.", 15, 50);
+
+      // Build the table body
+      const tableBodyQuiz = datos.empleados.map((emp) => [
+        emp.nombre,
+        emp.email,
+        `${emp.aciertos}%`,
+        `${emp.tiempo}s`,
+        emp.estado
+      ]);
+
+      doc.autoTable({
+        startY: 55,
+        head: [['Nombre', 'Email', 'Aciertos', 'Tiempo Promedio', 'Nivel de Riesgo']],
+        body: tableBodyQuiz,
+        theme: 'striped',
+        headStyles: { fillColor: [10, 79, 159], textColor: [255, 255, 255] },
+        columnStyles: {
+          2: { halign: 'center' },
+          3: { halign: 'center' },
+          4: { fontStyle: 'bold', halign: 'center' }
+        },
+        didParseCell: function(data) {
+          if (data.section === 'body' && data.column.index === 4) {
+            const val = data.cell.raw;
+            if (val === 'Protegido') {
+              data.cell.styles.textColor = [16, 185, 129];
+            } else if (val === 'Vulnerable') {
+              data.cell.styles.textColor = [245, 158, 11];
+            } else if (val === 'En Riesgo') {
+              data.cell.styles.textColor = [239, 68, 68];
+            }
+          }
+        },
+        margin: { left: 15, right: 15 },
+        styles: { fontSize: 9 }
+      });
+
+      drawFooter(2, 3);
+
+      // --- PAGE 3: SIMULACIONES DETALLADAS (SMTP) ---
+      doc.addPage();
+      drawHeader("Detalle de Simulaciones de Correo");
+
+      doc.setTextColor(30, 41, 59);
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text("HISTORIAL DE SIMULACROS SMTP LANZADOS", 15, 45);
+
+      // Table of campaigns
+      const tableBodyCampanas = simStats.campanas.map((c) => [
+        c.campana,
+        c.enviados,
+        c.abiertos,
+        c.clics,
+        `${c.ctr}%`
+      ]);
+
+      doc.autoTable({
+        startY: 50,
+        head: [['Campaña de Simulación', 'Enviados', 'Abiertos', 'Clics', 'Tasa Clics (CTR)']],
+        body: tableBodyCampanas,
+        theme: 'striped',
+        headStyles: { fillColor: [10, 79, 159], textColor: [255, 255, 255] },
+        columnStyles: {
+          1: { halign: 'center' },
+          2: { halign: 'center' },
+          3: { halign: 'center' },
+          4: { fontStyle: 'bold', halign: 'center' }
+        },
+        didParseCell: function(data) {
+          if (data.section === 'body' && data.column.index === 4) {
+            const val = parseFloat(data.cell.raw);
+            if (val >= 30) {
+              data.cell.styles.textColor = [239, 68, 68];
+            } else if (val >= 10) {
+              data.cell.styles.textColor = [245, 158, 11];
+            } else {
+              data.cell.styles.textColor = [16, 185, 129];
+            }
+          }
+        },
+        margin: { left: 15, right: 15 },
+        styles: { fontSize: 9 }
+      });
+
+      // Recent activity events heading
+      let currentY = doc.lastAutoTable.finalY + 10;
+      doc.setTextColor(30, 41, 59);
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text("BITÁCORA DE INTERACCIONES RECIENTES", 15, currentY);
+      
+      doc.setTextColor(100, 116, 139);
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.text("Detalle cronológico de aperturas y clics en enlaces maliciosos por parte de los destinatarios.", 15, currentY + 5);
+
+      // Table of events (limit to top 15 for space)
+      const tableBodyEventos = simStats.ultimos_eventos.slice(0, 15).map((e) => [
+        new Date(e.timestamp).toLocaleString('es-ES', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }),
+        e.destinatario || e.email,
+        e.campana,
+        e.tipo === 'CLICK' ? 'ACCESO ENLACE' : 'APERTURA',
+        e.ip || "N/A"
+      ]);
+
+      doc.autoTable({
+        startY: currentY + 10,
+        head: [['Fecha / Hora', 'Destinatario', 'Campaña', 'Evento', 'IP']],
+        body: tableBodyEventos,
+        theme: 'striped',
+        headStyles: { fillColor: [71, 85, 105], textColor: [255, 255, 255] }, // slate header
+        columnStyles: {
+          3: { fontStyle: 'bold', halign: 'center' },
+          4: { fontStyle: 'bold', halign: 'center' }
+        },
+        didParseCell: function(data) {
+          if (data.section === 'body' && data.column.index === 3) {
+            const val = data.cell.raw;
+            if (val === 'ACCESO ENLACE') {
+              data.cell.styles.textColor = [239, 68, 68];
+            } else {
+              data.cell.styles.textColor = [10, 79, 159];
+            }
+          }
+        },
+        margin: { left: 15, right: 15 },
+        styles: { fontSize: 8.5 }
+      });
+
+      drawFooter(3, 3);
+
+      // Save the PDF
+      const filename = `Reporte_Auditoria_PPS_${empresaSeleccionada ? empresaSeleccionada.empresa_nombre.replace(/\s+/g, '_') : 'CPCE_Mendoza'}_${new Date().toISOString().split('T')[0]}.pdf`;
+      doc.save(filename);
+    };
+
     const totalEmpleados = datos.empleados.length;
     const promedioAciertos = totalEmpleados > 0 
       ? Math.round(datos.empleados.reduce((acc, emp) => acc + emp.aciertos, 0) / totalEmpleados) 
@@ -324,11 +657,11 @@ export default function Dashboard() {
               ) : null}
               
               <button 
-                onClick={() => window.print()} 
+                onClick={exportarPDF} 
                 className="inline-flex items-center justify-center px-4 py-2.5 text-sm font-semibold text-white bg-[#0A4F9F] rounded-lg hover:bg-[#084183] transition-colors shadow-sm cursor-pointer"
               >
                 <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
-                Exportar PDF (Imprimir)
+                Exportar Reporte PDF
               </button>
             </div>
           </div>
