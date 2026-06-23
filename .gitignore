@@ -18,3 +18,8 @@ pgdata/
 # Logs y temporales
 *.log
 .DS_Store
+
+# Archivos de IA y Antigravity
+GEMINI.md
+Historial_Conversacion.md
+
