@@ -1,6 +1,23 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
+import {
+  ShieldCheck,
+  ShieldAlert,
+  CheckCircle2,
+  AlertCircle,
+  ArrowRight,
+  RotateCcw,
+  HelpCircle,
+  Mail,
+  Layers,
+  Inbox,
+  Sparkles,
+  ChevronRight,
+  Calendar,
+  User,
+  AlertTriangle
+} from 'lucide-react';
 
 export default function Quiz() {
   const navigate = useNavigate();
@@ -18,7 +35,7 @@ export default function Quiz() {
   const [pistaActiva, setPistaActiva] = useState(0);
   const [tiempoInicio, setTiempoInicio] = useState(null);
   
-  // === NUEVO: Contador de aciertos para el reporte final ===
+  // Contador de aciertos para el reporte final
   const [aciertosTotales, setAciertosTotales] = useState(0);
 
   const emailContainerRef = useRef(null);
@@ -48,7 +65,7 @@ export default function Quiz() {
       }
       setCargando(false);
     } catch (err) {
-      setError('Error al cargar tu entrenamiento.');
+      setError('Error al cargar tu módulo de entrenamiento.');
       setCargando(false);
     }
   };
@@ -60,7 +77,6 @@ export default function Quiz() {
       const escenariosMezclados = [...campana.scenarios].sort(() => Math.random() - 0.5);
       setEscenarios(escenariosMezclados);
       
-      // Reiniciamos contadores al empezar
       setPreguntaActual(0);
       setAciertosTotales(0);
 
@@ -75,7 +91,7 @@ export default function Quiz() {
       setFase('PREGUNTA');
       setCargando(false);
     } catch (err) {
-      setError('Error al iniciar la sesión. Contacte al administrador.');
+      setError('Error al iniciar la sesión de evaluación.');
       setCargando(false);
     }
   };
@@ -87,7 +103,6 @@ export default function Quiz() {
 
     setAcerto(esCorrecto);
     
-    // Sumamos un punto si acertó
     if (esCorrecto) {
       setAciertosTotales(prev => prev + 1);
     }
@@ -174,18 +189,27 @@ export default function Quiz() {
 
   if (cargando) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cpce-blue"></div>
+      <div className="flex flex-col justify-center items-center h-80">
+        <div className="animate-spin h-8 w-8 border-4 border-cpce-blue border-t-transparent rounded-full mb-3"></div>
+        <p className="text-xs text-slate-500 font-medium">Cargando evaluación de seguridad...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="max-w-2xl mx-auto mt-12 p-6 bg-red-50 text-red-700 rounded-xl border border-red-200 text-center">
-        <svg className="w-12 h-12 mx-auto mb-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-        <p className="font-semibold text-lg">{error}</p>
-        <button onClick={() => window.location.reload()} className="mt-4 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Reintentar</button>
+      <div className="max-w-md mx-auto my-12 p-8 bg-white rounded-2xl border border-red-200 text-center shadow-lg">
+        <div className="w-12 h-12 rounded-full bg-red-50 text-red-600 flex items-center justify-center mx-auto mb-4 border border-red-100">
+          <AlertCircle className="w-6 h-6" />
+        </div>
+        <h3 className="text-base font-bold text-slate-900 mb-1">Aviso del Sistema</h3>
+        <p className="text-xs text-slate-500 font-medium mb-6">{error}</p>
+        <button 
+          onClick={() => window.location.reload()} 
+          className="w-full bg-cpce-blue hover:bg-cpce-dark text-white font-semibold text-xs py-2.5 px-4 rounded-xl transition-all shadow-xs cursor-pointer"
+        >
+          Reintentar
+        </button>
       </div>
     );
   }
@@ -193,41 +217,50 @@ export default function Quiz() {
   if (fase === 'SIN_CAMPANAS') {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center text-center px-4 animate-fade-in">
-        <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 mb-6">
-          <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+        <div className="w-16 h-16 bg-blue-50 text-cpce-blue rounded-2xl flex items-center justify-center mb-4 border border-blue-100">
+          <ShieldCheck className="w-8 h-8" />
         </div>
-        <h2 className="text-2xl font-medium text-gray-900 mb-2">Todo al día</h2>
-        <p className="text-gray-500">No tienes entrenamientos pendientes en este momento.</p>
+        <h2 className="text-xl font-bold text-slate-900 mb-1">Todo al Día</h2>
+        <p className="text-xs text-slate-500 max-w-sm font-medium">No tienes evaluaciones pendientes en este momento. Vuelve a consultar más tarde.</p>
       </div>
     );
   }
 
   if (fase === 'LISTA') {
     return (
-      <div className="max-w-5xl mx-auto py-6 px-4 animate-fade-in">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-2">Tus Entrenamientos</h2>
-        <p className="text-gray-500 mb-8">Selecciona un módulo para comenzar tu capacitación.</p>
+      <div className="max-w-4xl mx-auto py-6 px-4 animate-fade-in space-y-6">
+        <div>
+          <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">Módulos de Entrenamiento</h2>
+          <p className="text-xs text-slate-500 mt-1 font-medium">Selecciona una evaluación interactiva para medir tu capacidad de detección de phishing.</p>
+        </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {campanasDisponibles.map(c => (
-            <div key={c.id} className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm flex flex-col hover:shadow-md transition-shadow">
-              <div className="flex justify-between items-start mb-4">
-                <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">
-                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+            <div key={c.id} className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-xs hover:shadow-md transition-all flex flex-col justify-between group relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-1 bg-cpce-blue"></div>
+              
+              <div>
+                <div className="flex justify-between items-start mb-4">
+                  <div className="w-10 h-10 bg-blue-50 text-cpce-blue rounded-xl flex items-center justify-center border border-blue-100">
+                    <Layers className="w-5 h-5" />
+                  </div>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                    {c.scenarios?.length} Escenarios
+                  </span>
                 </div>
-                <span className="bg-gray-100 text-gray-600 text-xs font-bold px-2.5 py-1 rounded-md tracking-wider">
-                  {c.scenarios?.length} Escenarios
-                </span>
+                
+                <h3 className="text-base font-bold text-slate-900 group-hover:text-cpce-blue transition-colors mb-1.5">{c.titulo}</h3>
+                <p className="text-xs text-slate-500 leading-relaxed font-medium mb-6 line-clamp-2">
+                  {c.descripcion || "Módulo institucional de detección de ciberamenazas y suplantación de identidad."}
+                </p>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">{c.titulo}</h3>
-              <p className="text-gray-500 text-sm mb-6 flex-1 line-clamp-2">
-                {c.descripcion || "Módulo de entrenamiento en detección de amenazas y phishing."}
-              </p>
+
               <button 
                 onClick={() => iniciarCampanaDirecta(c)} 
-                className="w-full bg-blue-600 text-white rounded-lg py-2.5 text-sm font-medium hover:bg-blue-700 transition-colors cursor-pointer"
+                className="w-full bg-cpce-blue hover:bg-cpce-dark text-white rounded-xl py-2.5 text-xs font-semibold shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
-                Comenzar Módulo
+                <span>Comenzar Evaluación</span>
+                <ChevronRight className="w-3.5 h-3.5" />
               </button>
             </div>
           ))}
@@ -236,42 +269,41 @@ export default function Quiz() {
     );
   }
 
-  // === NUEVA PANTALLA DE RESULTADOS DEL EMPLEADO ===
+  // PANTALLA DE RESULTADOS FINALES
   if (fase === 'FIN') {
     const porcentaje = Math.round((aciertosTotales / escenarios.length) * 100) || 0;
-    
-    // Evaluamos el rendimiento para cambiar los colores y el mensaje
-    let esExcelente = porcentaje >= 80;
-    let colorTexto = esExcelente ? "text-emerald-600" : "text-amber-500";
-    let bgIcono = esExcelente ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-amber-50 text-amber-500 border-amber-100";
-    let mensaje = esExcelente 
-      ? "¡Excelente nivel de alerta! Tienes un perfil altamente seguro." 
-      : "Buen intento, pero debes prestar más atención a los detalles de los remitentes y enlaces.";
+    const esExcelente = porcentaje >= 80;
+    const colorTexto = esExcelente ? "text-emerald-600" : "text-cpce-blue";
+    const bgIcono = esExcelente ? "bg-emerald-50 text-emerald-600 border-emerald-200" : "bg-blue-50 text-cpce-blue border-blue-200";
+    const mensaje = esExcelente 
+      ? "¡Excelente agudeza visual! Identificaste correctamente la gran mayoría de los vectores de ataque." 
+      : "Buen intento. Te recomendamos revisar minuciosamente los nombres de dominio de remitentes y los enlaces antes de interactuar.";
 
     return (
       <div className="min-h-[80vh] flex flex-col items-center justify-center px-4 animate-fade-in">
         
-        <div className="bg-white p-10 rounded-xl shadow-xl border-t-4 border-t-cpce-blue max-w-md w-full text-center relative overflow-hidden">
+        <div className="bg-white p-8 sm:p-10 rounded-2xl shadow-xl border border-slate-200 max-w-md w-full text-center relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1.5 bg-cpce-blue"></div>
           
-          <h2 className="text-sm font-bold text-slate-500 tracking-widest uppercase mb-6">Resultados del Módulo</h2>
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Resultado del Módulo</span>
           
-          <div className={`w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-6 shadow-sm border ${bgIcono}`}>
+          <div className={`w-16 h-16 mx-auto rounded-2xl flex items-center justify-center my-5 shadow-2xs border ${bgIcono}`}>
             {esExcelente ? (
-              <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              <ShieldCheck className="w-8 h-8" />
             ) : (
-              <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+              <Sparkles className="w-8 h-8" />
             )}
           </div>
 
-          <div className={`text-6xl font-black mb-2 tracking-tighter ${colorTexto}`}>
+          <div className={`text-5xl font-black mb-2 tracking-tight ${colorTexto}`}>
             {porcentaje}%
           </div>
           
-          <p className="text-slate-900 font-bold text-lg mb-2">
-            {aciertosTotales} de {escenarios.length} aciertos
+          <p className="text-slate-900 font-bold text-sm mb-2">
+            {aciertosTotales} de {escenarios.length} respuestas correctas
           </p>
           
-          <p className="text-slate-500 text-sm mb-8 leading-relaxed">
+          <p className="text-slate-500 text-xs mb-8 leading-relaxed font-medium">
             {mensaje}
           </p>
           
@@ -280,9 +312,10 @@ export default function Quiz() {
               setFase('CARGANDO'); 
               window.location.reload(); 
             }} 
-            className="w-full bg-cpce-blue text-white py-3 rounded-md font-semibold hover:bg-cpce-dark transition-colors shadow-sm cursor-pointer"
+            className="w-full bg-cpce-blue text-white py-3 rounded-xl font-semibold text-xs hover:bg-cpce-dark transition-all shadow-xs cursor-pointer flex items-center justify-center gap-2"
           >
-            Finalizar y Volver
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span>Finalizar y Salir</span>
           </button>
         </div>
       </div>
@@ -293,74 +326,117 @@ export default function Quiz() {
   const pistas = escenario?.clues || [];
 
   return (
-    <div className="max-w-5xl mx-auto py-6 px-4 font-sans animate-fade-in">
+    <div className="max-w-4xl mx-auto py-6 px-4 font-sans animate-fade-in space-y-6">
       
-      <div className="text-center mb-8">
+      {/* BARRA DE PROGRESO */}
+      <div className="flex items-center justify-between text-xs text-slate-500 font-medium">
+        <div className="flex items-center gap-2">
+          <span className="font-bold text-slate-800">Evaluación:</span>
+          <span>{campanaActiva?.titulo}</span>
+        </div>
+        <span className="bg-slate-100 text-slate-700 font-mono text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-slate-200">
+          Caso {preguntaActual + 1} de {escenarios.length}
+        </span>
+      </div>
+
+      {/* CABECERA DINÁMICA: PREGUNTA O RESULTADO */}
+      <div className="bg-white p-6 rounded-2xl border border-slate-200/90 shadow-xs text-center relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-1 bg-cpce-blue"></div>
+
         {fase === 'PREGUNTA' && (
-          <div className="animate-fade-in">
-            <h2 className="text-2xl md:text-3xl font-normal text-gray-900 mb-3">
-              Analiza este correo electrónico...
+          <div className="space-y-3">
+            <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+              ¿Este correo electrónico es legítimo o es un ataque de phishing?
             </h2>
-            <p className="text-sm text-gray-500 max-w-xl mx-auto">
-              Revisa los enlaces pasando el mouse por encima y verifica los remitentes. 
+            <p className="text-xs text-slate-500 font-medium max-w-lg mx-auto">
+              Inspecciona cuidadosamente el remitente, el asunto y los enlaces simulados en la bandeja inferior.
             </p>
-            <div className="mt-6 flex justify-center gap-4">
-              <button onClick={() => handleRespuesta(true)} className="bg-blue-600 text-white font-medium px-8 py-2.5 rounded-full shadow-sm hover:bg-blue-700 transition-colors cursor-pointer">
-                Es Phishing
+            <div className="pt-2 flex justify-center gap-3">
+              <button 
+                onClick={() => handleRespuesta(true)} 
+                className="bg-cpce-red hover:bg-red-600 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-xs transition-all flex items-center gap-2 cursor-pointer"
+              >
+                <ShieldAlert className="w-4 h-4" />
+                <span>Es Phishing</span>
               </button>
-              <button onClick={() => handleRespuesta(false)} className="bg-white border-2 border-blue-600 text-blue-600 font-medium px-8 py-2.5 rounded-full shadow-sm hover:bg-gray-50 transition-colors cursor-pointer">
-                Es Legítimo
+              <button 
+                onClick={() => handleRespuesta(false)} 
+                className="bg-white hover:bg-slate-50 text-emerald-700 border border-emerald-300 font-bold text-xs px-6 py-2.5 rounded-xl shadow-xs transition-all flex items-center gap-2 cursor-pointer"
+              >
+                <ShieldCheck className="w-4 h-4" />
+                <span>Es Legítimo</span>
               </button>
             </div>
           </div>
         )}
 
         {(fase === 'RESULTADO' || fase === 'PISTAS') && (
-          <div className="animate-fade-in">
-            <h2 className="text-3xl md:text-4xl font-normal mb-4">
-              <span className={`font-semibold ${acerto ? 'text-green-600' : 'text-red-600'}`}>
-                {acerto ? '¡Correcto! ' : '¡Incorrecto! '}
-              </span>
-              <span className="text-gray-900">{escenario.explicacion_titulo || (escenario.es_phishing ? 'Este era un ataque.' : 'El correo era seguro.')}</span>
+          <div className="space-y-3 animate-fade-in">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+              {acerto ? (
+                <span className="text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4" /> ¡Respuesta Correcta!
+                </span>
+              ) : (
+                <span className="text-cpce-red bg-red-50 border border-red-200 px-3 py-1 rounded-full flex items-center gap-1.5">
+                  <AlertTriangle className="w-4 h-4" /> ¡Respuesta Incorrecta!
+                </span>
+              )}
+            </div>
+
+            <h2 className="text-lg sm:text-xl font-bold text-slate-900">
+              {escenario.explicacion_titulo || (escenario.es_phishing ? 'Este correo era un ataque de Phishing.' : 'Este correo era una comunicación legítima.')}
             </h2>
-            <p className="text-sm text-gray-600 max-w-xl mx-auto mb-6">
-              {escenario.explicacion_texto || "Siempre mantén la guardia en alto."}
+            <p className="text-xs text-slate-600 max-w-xl mx-auto leading-relaxed font-medium">
+              {escenario.explicacion_texto || "Presta siempre atención a las anomalías en dominios y solicitudes de urgencia."}
             </p>
             {fase === 'RESULTADO' && (
-              <button onClick={handleMostrarPistas} className="bg-blue-600 text-white font-medium px-8 py-2.5 rounded-full shadow-sm hover:bg-blue-700 transition-colors cursor-pointer">
-                {pistas.length > 0 ? 'Mostrar Pistas' : 'Siguiente Escenario'}
-              </button>
+              <div className="pt-2">
+                <button 
+                  onClick={pistas.length > 0 ? handleMostrarPistas : handleSiguientePista} 
+                  className="bg-cpce-blue hover:bg-cpce-dark text-white font-semibold text-xs px-6 py-2.5 rounded-xl shadow-xs transition-all inline-flex items-center gap-2 cursor-pointer"
+                >
+                  <span>{pistas.length > 0 ? 'Ver Pistas y Análisis' : 'Siguiente Caso'}</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
             )}
           </div>
         )}
       </div>
 
+      {/* BANDEJA DE CORREO SIMULADA */}
       <div 
         ref={emailContainerRef} 
-        className={`relative bg-white border border-gray-300 rounded-xl shadow-sm overflow-hidden transition-all duration-500 ${fase !== 'PREGUNTA' ? 'ring-2 ring-gray-200 opacity-95' : ''}`}
+        className={`relative bg-white border border-slate-200/90 rounded-2xl shadow-xs overflow-hidden transition-all duration-300 ${
+          fase !== 'PREGUNTA' ? 'ring-2 ring-cpce-blue/20' : ''
+        }`}
       >
-        
-        <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-start bg-white">
-          <div className="flex gap-4">
-            <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-white font-medium text-lg shrink-0">
+        {/* Cabecera del Email */}
+        <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-start bg-slate-50/50">
+          <div className="flex gap-3.5">
+            <div className="w-9 h-9 rounded-xl bg-cpce-blue text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-2xs">
               {escenario?.remitente_nombre ? escenario.remitente_nombre.charAt(0).toUpperCase() : '?'}
             </div>
             <div>
-              <div className="flex flex-wrap items-baseline gap-1">
-                <span data-id="remitente" className="font-semibold text-gray-900">{escenario?.remitente_nombre}</span>
-                <span className="text-xs text-gray-500 font-mono">&lt;{escenario?.remitente_email}&gt;</span>
+              <div className="flex flex-wrap items-baseline gap-1.5">
+                <span data-id="remitente" className="font-bold text-slate-900 text-xs">{escenario?.remitente_nombre}</span>
+                <span className="text-[11px] text-slate-400 font-mono">&lt;{escenario?.remitente_email}&gt;</span>
               </div>
-              <p className="text-xs text-gray-400 mt-0.5">para mí ▾</p>
+              <p className="text-[10px] text-slate-400 font-medium mt-0.5">para: ti &lt;usuario@institucion.com&gt;</p>
             </div>
           </div>
-          <span data-id="fecha" className="text-xs text-gray-400 whitespace-nowrap pt-1">Hoy</span>
+          <span data-id="fecha" className="text-[10px] text-slate-400 font-medium">Hoy, 10:24 AM</span>
         </div>
 
-        <div className="px-6 md:px-12 py-8 bg-white min-h-[350px]">
-          <h3 data-id="asunto" className="text-xl font-normal text-gray-900 mb-6">{escenario?.asunto_simulado}</h3>
+        {/* Asunto y Cuerpo */}
+        <div className="p-6 md:p-8 bg-white min-h-[300px]">
+          <h3 data-id="asunto" className="text-base font-bold text-slate-900 mb-5 pb-3 border-b border-slate-100">
+            {escenario?.asunto_simulado}
+          </h3>
           
           <div 
-            className="cuerpo-html text-sm text-gray-800" 
+            className="cuerpo-html text-xs text-slate-700 leading-relaxed space-y-3" 
             onClick={(e) => {
               if (e.target.tagName === 'A' || e.target.closest('a')) {
                 e.preventDefault();
@@ -370,40 +446,34 @@ export default function Quiz() {
           />
         </div>
 
+        {/* TOOLTIP DE PISTAS (JIGSAW STYLE) */}
         {fase === 'PISTAS' && pistas.length > 0 && (
           <div className="absolute inset-0 z-10 pointer-events-none">
-            
             <div 
               style={{ ...estiloPista, position: 'absolute' }} 
-              className="bg-white border border-gray-200 shadow-2xl rounded-lg p-5 max-w-xs pointer-events-auto animate-fade-in z-20"
+              className="bg-white border border-cpce-blue shadow-2xl rounded-2xl p-4 max-w-xs pointer-events-auto animate-fade-in z-20"
             >
-              {tooltipArriba ? (
-                <div className="absolute -bottom-2 left-6 w-4 h-4 bg-white border-b border-r border-gray-200 transform rotate-45"></div>
-              ) : (
-                <div className="absolute -top-2 left-6 w-4 h-4 bg-white border-t border-l border-gray-200 transform rotate-45"></div>
-              )}
+              <div className="flex items-center gap-1.5 text-[10px] font-bold text-cpce-blue uppercase tracking-wider mb-2">
+                <HelpCircle className="w-3.5 h-3.5" />
+                <span>Pista {pistaActiva + 1} de {pistas.length}</span>
+              </div>
               
-              <div className="relative">
-                <p className="text-sm text-gray-700 leading-relaxed mb-4">
-                  {pistas[pistaActiva].texto}
-                </p>
-                
-                <div className="flex justify-end">
-                  <button 
-                    onClick={handleSiguientePista} 
-                    className="bg-blue-600 text-white text-xs font-medium px-4 py-2 rounded-full hover:bg-blue-700 transition-colors cursor-pointer"
-                  >
-                    {pistaActiva < pistas.length - 1 ? 'Siguiente pista' : 'Finalizar revisión'}
-                  </button>
-                </div>
+              <p className="text-xs text-slate-700 leading-relaxed font-medium mb-3">
+                {pistas[pistaActiva].texto}
+              </p>
+              
+              <div className="flex justify-end">
+                <button 
+                  onClick={handleSiguientePista} 
+                  className="bg-cpce-blue hover:bg-cpce-dark text-white text-[11px] font-bold px-3 py-1.5 rounded-lg transition-colors cursor-pointer flex items-center gap-1"
+                >
+                  <span>{pistaActiva < pistas.length - 1 ? 'Siguiente pista' : 'Siguiente caso'}</span>
+                  <ArrowRight className="w-3 h-3" />
+                </button>
               </div>
             </div>
           </div>
         )}
-      </div>
-
-      <div className="text-right mt-4">
-        <span className="text-xs text-gray-400 font-medium tracking-wider">Pregunta {preguntaActual + 1}/{escenarios.length}</span>
       </div>
 
     </div>
