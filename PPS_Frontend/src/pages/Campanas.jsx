@@ -18,7 +18,8 @@ import {
   Clock,
   ShieldCheck,
   ShieldAlert,
-  Inbox
+  Inbox,
+  Settings
 } from 'lucide-react';
 
 export default function Campanas() {

@@ -7,6 +7,7 @@ from authlib.integrations.starlette_client import OAuth
 from typing import List, Optional
 import logging
 from sqlalchemy.sql import func
+from sqlalchemy import text
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -16,7 +17,7 @@ from app.core.security import create_access_token, get_current_user, get_current
 from app.models import models
 from app.schemas import schemas
 from app.crud import crud
-from app.services.email_service import enviar_campana_simulacion
+from app.services.email_service import enviar_campana_simulacion, probar_conexion_smtp
 
 # 1. Crear las tablas en la base de datos si no existen
 # Base.metadata.create_all(bind=engine)  # <-- COMENTADO: Ahora usamos Alembic para migraciones
@@ -36,6 +37,17 @@ async def force_https_scheme(request: Request, call_next):
 
 @app.on_event("startup")
 def startup_db_seed():
+    # Migración automática segura de columnas SMTP en companies
+    try:
+        with engine.begin() as conn:
+            conn.execute(text("ALTER TABLE companies ADD COLUMN IF NOT EXISTS smtp_host VARCHAR;"))
+            conn.execute(text("ALTER TABLE companies ADD COLUMN IF NOT EXISTS smtp_port INTEGER DEFAULT 587;"))
+            conn.execute(text("ALTER TABLE companies ADD COLUMN IF NOT EXISTS smtp_user VARCHAR;"))
+            conn.execute(text("ALTER TABLE companies ADD COLUMN IF NOT EXISTS smtp_password VARCHAR;"))
+            conn.execute(text("ALTER TABLE companies ADD COLUMN IF NOT EXISTS smtp_use_tls BOOLEAN DEFAULT TRUE;"))
+    except Exception as e:
+        logger.warning(f"Aviso al verificar columnas SMTP: {e}")
+
     db = next(get_db())
     try:
         superadmins = [e.strip().lower() for e in settings.SUPERADMIN_EMAILS.split(",") if e.strip()]
@@ -541,3 +553,73 @@ def track_click(token: str, request: Request, background_tasks: BackgroundTasks,
     
     redirect_url = f"{settings.FRONTEND_URL}/quiz?from_sim={token}"
     return RedirectResponse(url=redirect_url)
+
+
+# ==========================================
+#        CONFIGURACIÓN SERVIDOR SMTP
+# ==========================================
+@app.get("/smtp/config", response_model=schemas.SMTPConfig, tags=["Configuración SMTP"])
+def get_smtp_config(company_id: Optional[int] = None, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_admin_empresa)):
+    """Obtiene la configuración SMTP de la institución o del entorno global."""
+    target_company_id = company_id if (current_user.rol == "SUPERADMIN" and company_id) else current_user.company_id
+    if target_company_id:
+        company = crud.get_company(db, target_company_id)
+        if company and company.smtp_host:
+            return schemas.SMTPConfig(
+                smtp_host=company.smtp_host or "",
+                smtp_port=company.smtp_port or 587,
+                smtp_user=company.smtp_user or "",
+                smtp_password=company.smtp_password or "",
+                smtp_use_tls=company.smtp_use_tls if company.smtp_use_tls is not None else True
+            )
+    return schemas.SMTPConfig(
+        smtp_host=getattr(settings, "SMTP_HOST", "") or "",
+        smtp_port=int(getattr(settings, "SMTP_PORT", 587)),
+        smtp_user=getattr(settings, "SMTP_USER", "") or "",
+        smtp_password=getattr(settings, "SMTP_PASSWORD", "") or "",
+        smtp_use_tls=bool(getattr(settings, "SMTP_USE_TLS", True))
+    )
+
+@app.put("/smtp/config", response_model=schemas.SMTPConfig, tags=["Configuración SMTP"])
+def update_smtp_config(config: schemas.SMTPConfig, company_id: Optional[int] = None, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_admin_empresa)):
+    """Actualiza los parámetros del servidor SMTP para la institución."""
+    target_company_id = company_id if (current_user.rol == "SUPERADMIN" and company_id) else current_user.company_id
+    if not target_company_id:
+        raise HTTPException(status_code=400, detail="Debe indicar la institución para asociar el servidor SMTP.")
+    
+    company = crud.get_company(db, target_company_id)
+    if not company:
+        raise HTTPException(status_code=404, detail="Institución no encontrada.")
+        
+    company.smtp_host = config.smtp_host
+    company.smtp_port = config.smtp_port
+    company.smtp_user = config.smtp_user
+    if config.smtp_password:
+        company.smtp_password = config.smtp_password
+    company.smtp_use_tls = config.smtp_use_tls
+    db.commit()
+    db.refresh(company)
+    
+    return schemas.SMTPConfig(
+        smtp_host=company.smtp_host or "",
+        smtp_port=company.smtp_port or 587,
+        smtp_user=company.smtp_user or "",
+        smtp_password=company.smtp_password or "",
+        smtp_use_tls=company.smtp_use_tls
+    )
+
+@app.post("/smtp/test", tags=["Configuración SMTP"])
+def test_smtp_config(request: schemas.SMTPTestRequest, current_user: models.User = Depends(get_current_admin_empresa)):
+    """Prueba la conexión enviando un correo de verificación en tiempo real."""
+    destinatario = request.destinatario_prueba or current_user.email
+    exito, detalle = probar_conexion_smtp(
+        smtp_host=request.smtp_host,
+        smtp_port=request.smtp_port,
+        smtp_user=request.smtp_user or "",
+        smtp_password=request.smtp_password or "",
+        smtp_use_tls=request.smtp_use_tls,
+        destinatario=destinatario
+    )
+    if not exito:
+        raise HTTPException(status_code=400, detail=f"Error de conexión SMTP: {detalle}")
+    return {"success": True, "message": f"¡Prueba SMTP exitosa! Correo enviado a {destinatario}"}

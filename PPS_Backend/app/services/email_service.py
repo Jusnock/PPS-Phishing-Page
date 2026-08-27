@@ -29,6 +29,48 @@ def reescribir_enlaces(html_content: str, token: str, backend_url: str) -> str:
         
     return re.sub(patron, replacement, html_content, flags=re.IGNORECASE)
 
+def probar_conexion_smtp(smtp_host: str, smtp_port: int, smtp_user: str, smtp_password: str, smtp_use_tls: bool, destinatario: str) -> tuple[bool, str]:
+    """
+    Intenta conectar con el servidor SMTP y enviar un correo de prueba.
+    Retorna (exito: bool, mensaje_detalle: str).
+    """
+    try:
+        if smtp_use_tls:
+            server = smtplib.SMTP(smtp_host, smtp_port, timeout=10)
+            server.starttls()
+        else:
+            server = smtplib.SMTP(smtp_host, smtp_port, timeout=10)
+            
+        if smtp_user and smtp_password:
+            server.login(smtp_user, smtp_password)
+            
+        remitente = smtp_user if smtp_user else "plataforma@cpcemza.org.ar"
+        
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = "✅ Prueba de Configuración SMTP Exitosa - CPCE Phishing"
+        msg['From'] = f"CPCE Seguridad <{remitente}>"
+        msg['To'] = destinatario
+        
+        cuerpo_html = f"""
+        <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
+            <h2 style="color: #004A98; margin-top: 0;">Conexión SMTP Verificada</h2>
+            <p style="color: #475569; font-size: 14px;">Este es un mensaje de prueba enviado desde la <strong>Plataforma de Capacitación y Phishing del CPCE Mendoza</strong>.</p>
+            <div style="background-color: #f8fafc; padding: 12px; border-radius: 6px; font-size: 12px; color: #334155; margin: 15px 0;">
+                <strong>Servidor:</strong> {smtp_host}:{smtp_port}<br/>
+                <strong>Usuario:</strong> {smtp_user or 'Sin autenticación'}<br/>
+                <strong>TLS:</strong> {'Activado' if smtp_use_tls else 'Desactivado'}
+            </div>
+            <p style="color: #10b981; font-weight: bold; font-size: 13px; margin-bottom: 0;">✓ El servidor SMTP está listo para enviar simulacros de concientización.</p>
+        </div>
+        """
+        msg.attach(MIMEText(cuerpo_html, 'html', 'utf-8'))
+        server.sendmail(remitente, [destinatario], msg.as_string())
+        server.quit()
+        return True, "¡Conexión y envío de prueba realizados con éxito!"
+    except Exception as e:
+        logger.error(f"[SMTP Test] Error al verificar servidor SMTP: {str(e)}")
+        return False, str(e)
+
 def enviar_campana_simulacion(db: Session, campaign_id: int):
     """
     Procesa y envía los correos de simulación de una campaña en segundo plano.
@@ -56,21 +98,21 @@ def enviar_campana_simulacion(db: Session, campaign_id: int):
 
     logger.info(f"[SMTP] Iniciando envío de {len(tokens)} correos para la campaña '{campaign.nombre}'...")
 
-    # Cargar configuraciones SMTP desde variables de entorno con valores por defecto seguros
-    # En desarrollo se puede usar Mailhog o un contenedor local escuchando en el puerto 1025
-    smtp_host = getattr(settings, "SMTP_HOST", "localhost")
-    smtp_port = int(getattr(settings, "SMTP_PORT", 1025))
-    smtp_user = getattr(settings, "SMTP_USER", None)
-    smtp_password = getattr(settings, "SMTP_PASSWORD", None)
-    smtp_use_tls = getattr(settings, "SMTP_USE_TLS", False)
+    # Cargar configuraciones SMTP: Prioridad a la Institución, fallback a .env global
+    company = campaign.company
+    smtp_host = (company.smtp_host if company and company.smtp_host else getattr(settings, "SMTP_HOST", "localhost"))
+    smtp_port = int(company.smtp_port if company and company.smtp_port else getattr(settings, "SMTP_PORT", 1025))
+    smtp_user = (company.smtp_user if company and company.smtp_user else getattr(settings, "SMTP_USER", None))
+    smtp_password = (company.smtp_password if company and company.smtp_password else getattr(settings, "SMTP_PASSWORD", None))
+    smtp_use_tls = (company.smtp_use_tls if company and company.smtp_use_tls is not None else getattr(settings, "SMTP_USE_TLS", False))
 
     try:
         # Inicializar conexión SMTP
         if smtp_use_tls:
-            server = smtplib.SMTP(smtp_host, smtp_port)
+            server = smtplib.SMTP(smtp_host, smtp_port, timeout=15)
             server.starttls()
         else:
-            server = smtplib.SMTP(smtp_host, smtp_port)
+            server = smtplib.SMTP(smtp_host, smtp_port, timeout=15)
             
         if smtp_user and smtp_password:
             server.login(smtp_user, smtp_password)

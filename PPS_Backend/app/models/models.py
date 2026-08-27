@@ -22,6 +22,13 @@ class Company(Base):
     nombre = Column(String, index=True)
     dominio_google = Column(String, unique=True, index=True) 
     
+    # --- Configuración Servidor SMTP (por Institución) ---
+    smtp_host = Column(String, nullable=True)
+    smtp_port = Column(Integer, nullable=True, default=587)
+    smtp_user = Column(String, nullable=True)
+    smtp_password = Column(String, nullable=True)
+    smtp_use_tls = Column(Boolean, default=True)
+
     users = relationship("User", back_populates="company", cascade="all, delete-orphan")
     quizzes = relationship("Quiz", back_populates="company", cascade="all, delete-orphan")
     scenarios = relationship("Scenario", back_populates="company", cascade="all, delete-orphan")

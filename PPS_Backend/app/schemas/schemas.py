@@ -12,9 +12,29 @@ class CompanyResponse(BaseModel):
     id: int
     nombre: str
     dominio_google: str
+    smtp_host: Optional[str] = None
+    smtp_port: Optional[int] = None
+    smtp_user: Optional[str] = None
+    smtp_use_tls: Optional[bool] = True
 
     class Config:
         from_attributes = True
+
+# --- SERVIDOR SMTP ---
+class SMTPConfig(BaseModel):
+    smtp_host: Optional[str] = ""
+    smtp_port: Optional[int] = 587
+    smtp_user: Optional[str] = ""
+    smtp_password: Optional[str] = ""
+    smtp_use_tls: Optional[bool] = True
+
+class SMTPTestRequest(BaseModel):
+    smtp_host: str
+    smtp_port: int = 587
+    smtp_user: Optional[str] = ""
+    smtp_password: Optional[str] = ""
+    smtp_use_tls: bool = True
+    destinatario_prueba: EmailStr
 
 # --- USUARIOS ---
 class UserLogin(BaseModel):
