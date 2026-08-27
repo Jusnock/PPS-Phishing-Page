@@ -2,6 +2,19 @@ import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import api from '../api/axios';
 import logo_nuevo from '../assets/logo_nuevo.jpg';
+import {
+  LayoutDashboard,
+  Users,
+  Mail,
+  GraduationCap,
+  LogOut,
+  Menu,
+  X,
+  Lock,
+  Eye,
+  EyeOff,
+  ShieldCheck
+} from 'lucide-react';
 
 export default function LayoutCorporativo() {
   const location = useLocation();
@@ -29,7 +42,6 @@ export default function LayoutCorporativo() {
       });
   }, []);
 
-  // Cerrar el menú móvil cuando cambia la ruta
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [location.pathname]);
@@ -55,7 +67,6 @@ export default function LayoutCorporativo() {
     try {
       setGuardandoPassword(true);
       await api.put('/users/change-password', { nueva_password: nuevaPassword });
-      
       setUsuario({ ...usuario, debe_cambiar_password: false });
       setGuardandoPassword(false);
     } catch (err) {
@@ -66,7 +77,7 @@ export default function LayoutCorporativo() {
 
   if (cargando) {
     return (
-      <div className="h-screen bg-slate-50 flex items-center justify-center">
+      <div className="h-screen w-screen bg-slate-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cpce-blue"></div>
       </div>
     );
@@ -74,216 +85,235 @@ export default function LayoutCorporativo() {
 
   if (!usuario) return null;
 
-  // =========================================================================
-  // EL MURO DE SEGURIDAD (Con colores CPCE)
-  // =========================================================================
+  // MURO DE SEGURIDAD (Cambio Obligatorio de Contraseña)
   if (usuario.debe_cambiar_password) {
     return (
-      <div className="h-screen w-full bg-slate-900 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md animate-fade-in relative overflow-hidden">
-          {/* Decoración superior */}
-          <div className="absolute top-0 left-0 w-full h-2 bg-cpce-blue"></div>
-          
-          <div className="flex justify-center mb-6">
-            <div className="w-16 h-16 bg-blue-50 text-cpce-blue rounded-full flex items-center justify-center">
-              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+      <div className="h-screen w-screen bg-slate-900/90 backdrop-blur flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-2xl p-7 w-full max-w-md animate-fade-in relative overflow-hidden border border-slate-200">
+          <div className="absolute top-0 left-0 w-full h-1.5 bg-cpce-blue"></div>
+
+          <div className="flex justify-center mb-4">
+            <div className="w-12 h-12 bg-blue-50 text-cpce-blue rounded-xl flex items-center justify-center border border-blue-100 shadow-xs">
+              <Lock className="w-6 h-6" />
             </div>
           </div>
-          
-          <h2 className="text-2xl font-bold text-center text-slate-900 mb-2">Actualiza tu contraseña</h2>
-          <p className="text-sm text-slate-500 text-center mb-8">Por políticas de seguridad, es obligatorio que cambies tu contraseña temporal antes de acceder a la plataforma.</p>
-          
+
+          <h2 className="text-xl font-bold text-center text-slate-900 tracking-tight">Actualiza tu contraseña</h2>
+          <p className="text-xs text-slate-500 text-center mt-1 mb-6">Por políticas institucionales, debes actualizar tu clave antes de acceder a la plataforma.</p>
+
           {errorPassword && (
-            <div className="mb-6 p-3 bg-red-50 border-l-4 border-red-500 text-red-700 text-sm rounded-r">
+            <div className="mb-5 p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg font-medium">
               {errorPassword}
             </div>
           )}
 
-          <form onSubmit={handleCambiarPassword} className="space-y-5">
+          <form onSubmit={handleCambiarPassword} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Nueva Contraseña</label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">Nueva Contraseña</label>
               <div className="relative">
-                <input 
-                  type={verNuevaPassword ? "text" : "password"} 
+                <input
+                  type={verNuevaPassword ? "text" : "password"}
                   required
                   value={nuevaPassword}
                   onChange={(e) => setNuevaPassword(e.target.value)}
-                  className="w-full border border-slate-300 rounded-md pl-4 pr-10 py-2.5 focus:ring-2 focus:ring-cpce-blue outline-none" 
+                  className="w-full border border-slate-300 rounded-lg pl-3 pr-10 py-2 text-xs focus:ring-2 focus:ring-cpce-blue outline-none bg-slate-50"
                   placeholder="Mínimo 6 caracteres"
                 />
-                <button 
-                  type="button" 
-                  onClick={() => setVerNuevaPassword(!verNuevaPassword)} 
+                <button
+                  type="button"
+                  onClick={() => setVerNuevaPassword(!verNuevaPassword)}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer"
                 >
-                  {verNuevaPassword ? (
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
-                    </svg>
-                  ) : (
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                  )}
+                  {verNuevaPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
+
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Confirmar Contraseña</label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">Confirmar Contraseña</label>
               <div className="relative">
-                <input 
-                  type={verConfirmarPassword ? "text" : "password"} 
+                <input
+                  type={verConfirmarPassword ? "text" : "password"}
                   required
                   value={confirmarPassword}
                   onChange={(e) => setConfirmarPassword(e.target.value)}
-                  className="w-full border border-slate-300 rounded-md pl-4 pr-10 py-2.5 focus:ring-2 focus:ring-cpce-blue outline-none" 
+                  className="w-full border border-slate-300 rounded-lg pl-3 pr-10 py-2 text-xs focus:ring-2 focus:ring-cpce-blue outline-none bg-slate-50"
                   placeholder="Repite tu contraseña"
                 />
-                <button 
-                  type="button" 
-                  onClick={() => setVerConfirmarPassword(!verConfirmarPassword)} 
+                <button
+                  type="button"
+                  onClick={() => setVerConfirmarPassword(!verConfirmarPassword)}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer"
                 >
-                  {verConfirmarPassword ? (
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
-                    </svg>
-                  ) : (
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                  )}
+                  {verConfirmarPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
-            
-            <button 
-              type="submit" 
+
+            <button
+              type="submit"
               disabled={guardandoPassword}
-              className={`w-full py-3 rounded-md text-white font-medium flex justify-center items-center transition-colors ${guardandoPassword ? 'bg-blue-400 cursor-not-allowed' : 'bg-cpce-blue hover:bg-cpce-dark cursor-pointer'}`}
+              className="w-full py-2.5 rounded-lg text-white font-semibold text-xs bg-cpce-blue hover:bg-cpce-dark transition-colors shadow-sm disabled:opacity-60 cursor-pointer"
             >
-              {guardandoPassword ? (
-                <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-              ) : 'Guardar y Continuar'}
+              {guardandoPassword ? 'Guardando...' : 'Guardar y Continuar'}
             </button>
           </form>
 
-          <button onClick={handleLogout} className="mt-6 w-full text-sm text-slate-500 hover:text-slate-800 transition-colors cursor-pointer">
-            Cerrar sesión y hacerlo más tarde
+          <button onClick={handleLogout} className="mt-5 w-full text-xs text-slate-400 hover:text-slate-700 transition-colors text-center cursor-pointer">
+            Cerrar sesión
           </button>
         </div>
       </div>
     );
   }
-  // =========================================================================
 
   const esAdmin = usuario.rol === 'SUPERADMIN' || usuario.rol === 'ADMIN_EMPRESA';
 
   return (
-    <div className="h-screen bg-slate-50 flex font-sans text-slate-900 overflow-hidden relative">
+    <div className="h-screen w-screen bg-slate-50 flex font-sans text-slate-900 overflow-hidden select-none">
       
-      {/* Backdrop para móviles */}
+      {/* Backdrop móvil */}
       {mobileMenuOpen && (
         <div 
-          className="fixed inset-0 bg-slate-900/40 z-20 md:hidden animate-fade-in"
+          className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-30 md:hidden animate-fade-in"
           onClick={() => setMobileMenuOpen(false)}
         />
       )}
 
-      {/* SIDEBAR ESTILO CPCE */}
-      <aside className={`fixed inset-y-0 left-0 w-64 bg-cpce-blue text-white flex flex-col h-full transition-transform duration-300 ease-in-out shrink-0 shadow-xl z-30 md:static md:translate-x-0 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        {/* Cabecera blanca con logo - Ajuste fino de tamaño */}
-        <div className="h-28 flex flex-col justify-center px-4 border-b border-cpce-dark shrink-0 bg-white relative">
+      {/* SIDEBAR CORPORATIVO CPCE (Always fit to 100vh) */}
+      <aside className={`fixed inset-y-0 left-0 w-64 bg-cpce-blue text-white flex flex-col h-screen max-h-screen transition-transform duration-200 ease-in-out shrink-0 shadow-xl z-40 md:static md:translate-x-0 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        
+        {/* Cabecera blanca con logo oficial */}
+        <div className="h-20 bg-white flex items-center justify-between px-4 border-b border-slate-200 shrink-0">
           <img 
             src={logo_nuevo} 
             alt="CPCE Mendoza" 
-            className="h-20 w-full object-contain" 
+            className="h-12 w-auto max-w-[190px] object-contain" 
           />
-          {/* Botón para cerrar en móviles */}
           <button 
             onClick={() => setMobileMenuOpen(false)}
-            className="absolute top-2 right-2 p-1.5 text-slate-400 hover:text-slate-600 md:hidden cursor-pointer"
+            className="p-1.5 text-slate-400 hover:text-slate-700 md:hidden cursor-pointer"
           >
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <X className="h-5 w-5" />
           </button>
         </div>
 
-        <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-          <div className="text-xs font-bold text-blue-200 uppercase tracking-widest mb-4 px-2">Capacitación</div>
+        {/* Navegación central con scroll interno si fuera necesario */}
+        <nav className="flex-1 px-3 py-4 space-y-1.5 overflow-y-auto min-h-0">
+          <div className="text-[10px] font-bold text-blue-200 uppercase tracking-widest px-3 mb-2">
+            Capacitación
+          </div>
           
           {esAdmin && (
             <>
-              <Link to="/dashboard" className={`flex items-center px-3 py-2.5 text-sm font-medium rounded-md transition-all ${isActive('/dashboard') ? 'bg-white text-cpce-blue shadow-sm' : 'text-blue-100 hover:bg-cpce-dark hover:text-white'}`}>
-                <svg className="mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
-                Dashboard
+              <Link
+                to="/dashboard"
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
+                  isActive('/dashboard') 
+                    ? 'bg-white text-cpce-blue shadow-xs font-bold' 
+                    : 'text-blue-100 hover:bg-cpce-dark hover:text-white'
+                }`}
+              >
+                <LayoutDashboard className="h-4 w-4 shrink-0" />
+                <span>Dashboard</span>
               </Link>
               
-              <Link to="/gestion" className={`flex items-center px-3 py-2.5 text-sm font-medium rounded-md transition-all ${isActive('/gestion') ? 'bg-white text-cpce-blue shadow-sm' : 'text-blue-100 hover:bg-cpce-dark hover:text-white'}`}>
-                <svg className="mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-                Gestión
+              <Link
+                to="/gestion"
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
+                  isActive('/gestion') 
+                    ? 'bg-white text-cpce-blue shadow-xs font-bold' 
+                    : 'text-blue-100 hover:bg-cpce-dark hover:text-white'
+                }`}
+              >
+                <Users className="h-4 w-4 shrink-0" />
+                <span>Gestión</span>
               </Link>
             </>
           )}
 
           {esAdmin ? (
-            <Link to="/campanas" className={`flex items-center px-3 py-2.5 text-sm font-medium rounded-md transition-all ${isActive('/campanas') ? 'bg-white text-cpce-blue shadow-sm' : 'text-blue-100 hover:bg-cpce-dark hover:text-white'}`}>
-              <svg className="mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-              Creador de Campañas
+            <Link
+              to="/campanas"
+              className={`flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
+                isActive('/campanas') 
+                  ? 'bg-white text-cpce-blue shadow-xs font-bold' 
+                  : 'text-blue-100 hover:bg-cpce-dark hover:text-white'
+              }`}
+            >
+              <Mail className="h-4 w-4 shrink-0" />
+              <span>Creador de Campañas</span>
             </Link>
           ) : (
-            <Link to="/quiz" className={`flex items-center px-3 py-2.5 text-sm font-medium rounded-md transition-all ${isActive('/quiz') ? 'bg-white text-cpce-blue shadow-sm' : 'text-blue-100 hover:bg-cpce-dark hover:text-white'}`}>
-              <svg className="mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-              Mis Entrenamientos
+            <Link
+              to="/quiz"
+              className={`flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
+                isActive('/quiz') 
+                  ? 'bg-white text-cpce-blue shadow-xs font-bold' 
+                  : 'text-blue-100 hover:bg-cpce-dark hover:text-white'
+              }`}
+            >
+              <GraduationCap className="h-4 w-4 shrink-0" />
+              <span>Mis Entrenamientos</span>
             </Link>
           )}
         </nav>
 
-        {/* CERRAR SESIÓN ESTILO CPCE */}
-        <div className="p-4 border-t border-cpce-dark shrink-0 bg-cpce-dark/50">
-          <button onClick={handleLogout} className="flex items-center w-full px-3 py-2.5 text-sm font-medium text-blue-100 rounded-md hover:bg-cpce-red hover:text-white transition-colors cursor-pointer">
-            <svg className="mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-            Cerrar Sesión
+        {/* PIE DE SIDEBAR: SIEMPRE VISIBLE SIN SCROLL */}
+        <div className="p-3 border-t border-cpce-dark/80 shrink-0 bg-cpce-dark/60 space-y-2.5">
+          <div className="flex items-center gap-2.5 px-2">
+            <div className="w-8 h-8 rounded-full bg-white text-cpce-blue flex items-center justify-center text-xs font-bold shrink-0 shadow-2xs">
+              {usuario.nombre ? usuario.nombre.charAt(0).toUpperCase() : 'U'}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-semibold text-white truncate leading-tight">{usuario.nombre}</p>
+              <p className="text-[10px] text-blue-200 font-mono truncate">{usuario.rol}</p>
+            </div>
+          </div>
+
+          <button
+            onClick={handleLogout}
+            className="flex items-center justify-center gap-2 w-full px-3 py-2 text-xs font-semibold text-blue-100 rounded-lg hover:bg-cpce-red hover:text-white transition-all cursor-pointer shadow-2xs"
+          >
+            <LogOut className="h-3.5 w-3.5 shrink-0" />
+            <span>Cerrar Sesión</span>
           </button>
         </div>
       </aside>
 
       {/* ÁREA PRINCIPAL */}
-      <main className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+      <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
         
         {/* Topbar */}
-        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-8 shrink-0 z-10">
+        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-8 shrink-0 z-20 shadow-xs">
           <div className="flex items-center gap-3">
-            {/* Botón de menú para móviles */}
             <button 
               onClick={() => setMobileMenuOpen(true)}
-              className="p-2 -ml-2 text-slate-600 hover:text-slate-800 md:hidden cursor-pointer"
+              className="p-1.5 text-slate-600 hover:text-slate-900 md:hidden cursor-pointer rounded-md hover:bg-slate-100"
             >
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
+              <Menu className="h-5 w-5" />
             </button>
-            <h1 className="text-lg md:text-xl font-bold text-slate-800 capitalize tracking-tight">
+            <h1 className="text-base sm:text-lg font-bold text-slate-900 capitalize tracking-tight">
               {location.pathname.replace('/', '') || 'Dashboard'}
             </h1>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="flex flex-col items-end">
-              <span className="text-sm font-bold text-slate-700">{usuario.nombre}</span>
-              <span className="text-xs text-slate-500 font-mono tracking-wider">{usuario.rol}</span>
+
+          <div className="flex items-center gap-3">
+            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span>Conectado</span>
             </div>
-            <div className="h-9 w-9 rounded-md bg-blue-50 border border-blue-100 flex items-center justify-center shadow-sm">
-              <span className="text-sm font-bold text-cpce-blue">{usuario.nombre.charAt(0).toUpperCase()}</span>
+            <div className="h-8 w-8 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center">
+              <span className="text-xs font-bold text-cpce-blue">
+                {usuario.nombre ? usuario.nombre.charAt(0).toUpperCase() : 'U'}
+              </span>
             </div>
           </div>
         </header>
 
-        {/* Contenido */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-8 bg-slate-50">
-          <div className="max-w-7xl mx-auto pb-12">
+        {/* Contenido scrolleable independientemente */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 bg-slate-50">
+          <div className="max-w-7xl w-full mx-auto pb-10">
             <Outlet />
           </div>
         </div>

@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CyberShield PPS - CPCE Mendoza Dashboard</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            cpce: {
+              blue: '#004A98',
+              dark: '#003366',
+              red: '#FF4B4B',
+              light: '#EBF3FA',
+              accent: '#0A4F9F',
+            },
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex antialiased selection:bg-blue-100 selection:text-cpce-dark">
+
+  <!-- SIDEBAR CORPORATIVO CPCE -->
+  <aside class="w-64 bg-cpce-blue text-white flex flex-col justify-between hidden md:flex shrink-0 shadow-lg border-r border-cpce-dark">
+    <div>
+      <!-- Header / Brand -->
+      <div class="h-20 bg-white flex items-center px-5 border-b border-slate-200 gap-3">
+        <div class="w-9 h-9 rounded-lg bg-cpce-blue text-white flex items-center justify-center shadow-sm">
+          <i data-lucide="shield-alert" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h1 class="text-sm font-bold text-cpce-blue tracking-tight leading-tight">CPCE Mendoza</h1>
+          <p class="text-[11px] text-slate-500 font-medium">Phishing Simulator PPS</p>
+        </div>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav class="p-4 space-y-1.5">
+        <div class="px-3 py-1.5 text-[10px] font-bold text-blue-200 uppercase tracking-widest">
+          Capacitación & SecOps
+        </div>
+        
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-white text-cpce-blue font-semibold text-xs shadow-sm transition-all">
+          <i data-lucide="layout-dashboard" class="w-4 h-4 text-cpce-blue"></i>
+          <span>Dashboard Global</span>
+        </a>
+
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-blue-100 hover:bg-cpce-dark hover:text-white text-xs font-medium transition-colors">
+          <i data-lucide="mail" class="w-4 h-4"></i>
+          <span>Creador de Campañas</span>
+          <span class="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-cpce-dark text-blue-200 font-mono">4 Activas</span>
+        </a>
+
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-blue-100 hover:bg-cpce-dark hover:text-white text-xs font-medium transition-colors">
+          <i data-lucide="users" class="w-4 h-4"></i>
+          <span>Gestión de Destinatarios</span>
+        </a>
+
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-blue-100 hover:bg-cpce-dark hover:text-white text-xs font-medium transition-colors">
+          <i data-lucide="grad-cap" class="w-4 h-4"></i>
+          <span>Módulos de Quiz</span>
+        </a>
+
+        <div class="pt-5 px-3 py-1.5 text-[10px] font-bold text-blue-200 uppercase tracking-widest">
+          Auditoría & Ajustes
+        </div>
+
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-blue-100 hover:bg-cpce-dark hover:text-white text-xs font-medium transition-colors">
+          <i data-lucide="file-bar-chart" class="w-4 h-4"></i>
+          <span>Reportes & Métricas</span>
+        </a>
+
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-blue-100 hover:bg-cpce-dark hover:text-white text-xs font-medium transition-colors">
+          <i data-lucide="server" class="w-4 h-4"></i>
+          <span>Configuración Relay SMTP</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- User / Footer CPCE -->
+    <div class="p-4 border-t border-cpce-dark bg-cpce-dark/50">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-full bg-white text-cpce-blue flex items-center justify-center text-xs font-bold shadow-sm">
+          JV
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-xs font-semibold text-white truncate">Juan Francisco V.</p>
+          <p class="text-[11px] text-blue-200 truncate">Superadministrador</p>
+        </div>
+        <button title="Cerrar sesión" class="text-blue-200 hover:text-white hover:bg-cpce-red p-1.5 rounded-md transition-colors">
+          <i data-lucide="log-out" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN AREA -->
+  <main class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+    <!-- Top Header -->
+    <header class="h-20 bg-white border-b border-slate-200 px-6 sm:px-8 flex items-center justify-between sticky top-0 z-20 shadow-xs">
+      <div class="flex items-center gap-3">
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          Plataforma Activa
+        </span>
+        <span class="text-xs text-slate-300">|</span>
+        <span class="text-xs text-slate-500 font-medium">Entorno: <strong class="text-slate-800 font-semibold">Consejo Profesional CPCE</strong></span>
+      </div>
+
+      <!-- Header actions -->
+      <div class="flex items-center gap-3">
+        <div class="relative hidden sm:block">
+          <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-slate-400"></i>
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="Buscar campaña, área o target..."
+            class="w-64 bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-3 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-cpce-blue focus:ring-1 focus:ring-cpce-blue transition-all"
+          />
+        </div>
+
+        <button class="flex items-center gap-2 px-3 py-2 rounded-lg bg-white border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-cpce-blue transition-all shadow-xs">
+          <i data-lucide="download" class="w-3.5 h-3.5 text-slate-500"></i>
+          <span>Exportar PDF</span>
+        </button>
+
+        <button class="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-cpce-blue hover:bg-cpce-dark text-xs font-semibold text-white shadow-sm transition-all">
+          <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+          <span>Nueva Campaña</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Content Body -->
+    <div class="p-6 sm:p-8 space-y-6 max-w-7xl w-full mx-auto">
+
+      <!-- Title & Time Filter -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Monitor Global de Concientización</h2>
+          <p class="text-xs text-slate-500 mt-1 font-medium">Resumen operativo de simulaciones de phishing, tasa de compromiso y aprendizaje interactivo.</p>
+        </div>
+
+        <div class="flex items-center gap-1.5 bg-white border border-slate-200 p-1 rounded-lg shadow-xs self-start sm:self-auto">
+          <button class="px-3 py-1 text-xs font-semibold rounded-md bg-cpce-blue text-white shadow-xs">Últimos 30 días</button>
+          <button class="px-3 py-1 text-xs font-medium rounded-md text-slate-600 hover:text-cpce-blue transition-colors">Este Trimestre</button>
+          <button class="px-3 py-1 text-xs font-medium rounded-md text-slate-600 hover:text-cpce-blue transition-colors">Año 2026</button>
+        </div>
+      </div>
+
+      <!-- KPI Grid CPCE -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        
+        <!-- KPI 1: Acierto / Resiliencia Global -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200/90 shadow-sm relative overflow-hidden flex flex-col justify-between hover:shadow-md transition-shadow">
+          <div class="absolute top-0 left-0 w-full h-1 bg-cpce-blue"></div>
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Acierto Global Quiz</span>
+            <div class="w-8 h-8 rounded-lg bg-blue-50 text-cpce-blue flex items-center justify-center border border-blue-100">
+              <i data-lucide="shield-check" class="w-4 h-4 text-cpce-blue"></i>
+            </div>
+          </div>
+          <div class="mt-3">
+            <div class="flex items-baseline gap-2">
+              <span class="text-3xl font-extrabold text-cpce-blue tracking-tight">88.4%</span>
+              <span class="text-xs font-semibold text-emerald-600 flex items-center gap-0.5">
+                <i data-lucide="trending-up" class="w-3 h-3"></i> +5.2%
+              </span>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-1">388 profesionales aprobados</p>
+          </div>
+        </div>
+
+        <!-- KPI 2: Envíos Simulados -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200/90 shadow-sm relative overflow-hidden flex flex-col justify-between hover:shadow-md transition-shadow">
+          <div class="absolute top-0 left-0 w-full h-1 bg-slate-400"></div>
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Envíos SMTP</span>
+            <div class="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center border border-slate-200">
+              <i data-lucide="send" class="w-4 h-4 text-slate-600"></i>
+            </div>
+          </div>
+          <div class="mt-3">
+            <div class="flex items-baseline gap-2">
+              <span class="text-3xl font-extrabold text-slate-900 tracking-tight">4,820</span>
+              <span class="text-xs font-semibold text-slate-500">correos</span>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-1">98.9% entregabilidad efectiva</p>
+          </div>
+        </div>
+
+        <!-- KPI 3: Tasa de Apertura -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200/90 shadow-sm relative overflow-hidden flex flex-col justify-between hover:shadow-md transition-shadow">
+          <div class="absolute top-0 left-0 w-full h-1 bg-sky-500"></div>
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Tasa de Apertura</span>
+            <div class="w-8 h-8 rounded-lg bg-sky-50 text-sky-700 flex items-center justify-center border border-sky-100">
+              <i data-lucide="mail-open" class="w-4 h-4 text-sky-600"></i>
+            </div>
+          </div>
+          <div class="mt-3">
+            <div class="flex items-baseline gap-2">
+              <span class="text-3xl font-extrabold text-slate-900 tracking-tight">54.3%</span>
+              <span class="text-xs font-semibold text-slate-500">2,618 abiertos</span>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-1">Tasa normal esperada: &gt; 50%</p>
+          </div>
+        </div>
+
+        <!-- KPI 4: Compromiso / Clics Trampa -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200/90 shadow-sm relative overflow-hidden flex flex-col justify-between hover:shadow-md transition-shadow">
+          <div class="absolute top-0 left-0 w-full h-1 bg-cpce-red"></div>
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Clics Trampa (Riesgo)</span>
+            <div class="w-8 h-8 rounded-lg bg-red-50 text-cpce-red flex items-center justify-center border border-red-100">
+              <i data-lucide="alert-triangle" class="w-4 h-4 text-cpce-red"></i>
+            </div>
+          </div>
+          <div class="mt-3">
+            <div class="flex items-baseline gap-2">
+              <span class="text-3xl font-extrabold text-cpce-red tracking-tight">9.8%</span>
+              <span class="text-xs font-semibold text-emerald-600 flex items-center gap-0.5">
+                <i data-lucide="trending-down" class="w-3 h-3"></i> -4.2%
+              </span>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-1">Reducción continua de vulnerabilidad</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Main Layout 2:1 -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Tabla de Campañas Activas (2 Columnas) -->
+        <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200/90 shadow-sm overflow-hidden flex flex-col">
+          <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h3 class="text-sm font-bold text-slate-900 tracking-tight">Campañas de Simulación Recientes</h3>
+              <p class="text-xs text-slate-500 mt-0.5">Control de envíos masivos, apertura y comportamiento de destinatarios.</p>
+            </div>
+
+            <!-- Tab Filters -->
+            <div class="flex items-center gap-1.5" id="campaignFilters">
+              <button onclick="filterCampaigns('all')" class="filter-btn px-2.5 py-1 text-xs font-semibold rounded-md bg-cpce-blue text-white shadow-xs transition-all">Todas</button>
+              <button onclick="filterCampaigns('active')" class="filter-btn px-2.5 py-1 text-xs font-medium rounded-md text-slate-600 hover:text-cpce-blue transition-colors">En Curso</button>
+              <button onclick="filterCampaigns('done')" class="filter-btn px-2.5 py-1 text-xs font-medium rounded-md text-slate-600 hover:text-cpce-blue transition-colors">Finalizadas</button>
+            </div>
+          </div>
+
+          <!-- Table Content -->
+          <div class="overflow-x-auto flex-1">
+            <table class="w-full text-left text-xs text-slate-700">
+              <thead class="bg-slate-50 text-slate-500 uppercase tracking-wider font-bold border-b border-slate-200 text-[10px]">
+                <tr>
+                  <th class="py-3.5 px-4">Campaña / Vector</th>
+                  <th class="py-3.5 px-4">Objetivos</th>
+                  <th class="py-3.5 px-4">Apertura</th>
+                  <th class="py-3.5 px-4">Clics Trampa</th>
+                  <th class="py-3.5 px-4">Estado</th>
+                  <th class="py-3.5 px-4 text-right">Detalle</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100" id="campaignsTableBody">
+                
+                <!-- Row 1 -->
+                <tr class="campaign-row hover:bg-slate-50/80 transition-colors" data-status="active">
+                  <td class="py-4 px-4">
+                    <div class="font-bold text-slate-900">Actualización Obligatoria M365</div>
+                    <div class="text-[11px] text-slate-500">Phishing de Credenciales • Fake IT</div>
+                  </td>
+                  <td class="py-4 px-4 font-mono font-medium text-slate-700">620 usuarios</td>
+                  <td class="py-4 px-4">
+                    <div class="flex items-center gap-2">
+                      <span class="font-semibold text-slate-800">68.2%</span>
+                      <div class="w-12 bg-slate-100 rounded-full h-1.5 overflow-hidden border border-slate-200">
+                        <div class="bg-cpce-blue h-1.5 rounded-full" style="width: 68.2%"></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="py-4 px-4">
+                    <span class="inline-flex items-center gap-1 font-bold text-cpce-red">
+                      8.4% <span class="text-slate-400 text-[10px] font-normal">(52 clics)</span>
+                    </span>
+                  </td>
+                  <td class="py-4 px-4">
+                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-blue-50 text-cpce-blue border border-blue-200">
+                      En Curso
+                    </span>
+                  </td>
+                  <td class="py-4 px-4 text-right">
+                    <button class="px-2.5 py-1 text-xs font-semibold text-cpce-blue hover:bg-blue-50 rounded-md border border-slate-200 hover:border-blue-200 transition-colors">
+                      Ver
+                    </button>
+                  </td>
+                </tr>
+
+                <!-- Row 2 -->
+                <tr class="campaign-row hover:bg-slate-50/80 transition-colors" data-status="done">
+                  <td class="py-4 px-4">
+                    <div class="font-bold text-slate-900">Notificación Factura AFIP - Deuda</div>
+                    <div class="text-[11px] text-slate-500">Spear Phishing Financiero</div>
+                  </td>
+                  <td class="py-4 px-4 font-mono font-medium text-slate-700">145 usuarios (Finanzas)</td>
+                  <td class="py-4 px-4">
+                    <div class="flex items-center gap-2">
+                      <span class="font-semibold text-slate-800">81.4%</span>
+                      <div class="w-12 bg-slate-100 rounded-full h-1.5 overflow-hidden border border-slate-200">
+                        <div class="bg-cpce-blue h-1.5 rounded-full" style="width: 81.4%"></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="py-4 px-4">
+                    <span class="inline-flex items-center gap-1 font-bold text-cpce-red">
+                      15.8% <span class="text-slate-400 text-[10px] font-normal">(23 clics)</span>
+                    </span>
+                  </td>
+                  <td class="py-4 px-4">
+                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      Finalizada
+                    </span>
+                  </td>
+                  <td class="py-4 px-4 text-right">
+                    <button class="px-2.5 py-1 text-xs font-semibold text-cpce-blue hover:bg-blue-50 rounded-md border border-slate-200 hover:border-blue-200 transition-colors">
+                      Ver
+                    </button>
+                  </td>
+                </tr>
+
+                <!-- Row 3 -->
+                <tr class="campaign-row hover:bg-slate-50/80 transition-colors" data-status="done">
+                  <td class="py-4 px-4">
+                    <div class="font-bold text-slate-900">Bono Extraordinario Anual CPCE</div>
+                    <div class="text-[11px] text-slate-500">Ingeniería Social / Enlace de Descarga</div>
+                  </td>
+                  <td class="py-4 px-4 font-mono font-medium text-slate-700">1,200 usuarios</td>
+                  <td class="py-4 px-4">
+                    <div class="flex items-center gap-2">
+                      <span class="font-semibold text-slate-800">74.0%</span>
+                      <div class="w-12 bg-slate-100 rounded-full h-1.5 overflow-hidden border border-slate-200">
+                        <div class="bg-cpce-blue h-1.5 rounded-full" style="width: 74%"></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="py-4 px-4">
+                    <span class="inline-flex items-center gap-1 font-bold text-amber-600">
+                      11.5% <span class="text-slate-400 text-[10px] font-normal">(138 clics)</span>
+                    </span>
+                  </td>
+                  <td class="py-4 px-4">
+                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      Finalizada
+                    </span>
+                  </td>
+                  <td class="py-4 px-4 text-right">
+                    <button class="px-2.5 py-1 text-xs font-semibold text-cpce-blue hover:bg-blue-50 rounded-md border border-slate-200 hover:border-blue-200 transition-colors">
+                      Ver
+                    </button>
+                  </td>
+                </tr>
+
+                <!-- Row 4 -->
+                <tr class="campaign-row hover:bg-slate-50/80 transition-colors" data-status="active">
+                  <td class="py-4 px-4">
+                    <div class="font-bold text-slate-900">Alerta de Seguridad VPN Institucional</div>
+                    <div class="text-[11px] text-slate-500">Suplantación de Soporte de Red</div>
+                  </td>
+                  <td class="py-4 px-4 font-mono font-medium text-slate-700">450 usuarios</td>
+                  <td class="py-4 px-4">
+                    <div class="flex items-center gap-2">
+                      <span class="font-semibold text-slate-800">42.1%</span>
+                      <div class="w-12 bg-slate-100 rounded-full h-1.5 overflow-hidden border border-slate-200">
+                        <div class="bg-cpce-blue h-1.5 rounded-full" style="width: 42.1%"></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="py-4 px-4">
+                    <span class="inline-flex items-center gap-1 font-bold text-emerald-600">
+                      3.2% <span class="text-slate-400 text-[10px] font-normal">(14 clics)</span>
+                    </span>
+                  </td>
+                  <td class="py-4 px-4">
+                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-blue-50 text-cpce-blue border border-blue-200">
+                      En Curso
+                    </span>
+                  </td>
+                  <td class="py-4 px-4 text-right">
+                    <button class="px-2.5 py-1 text-xs font-semibold text-cpce-blue hover:bg-blue-50 rounded-md border border-slate-200 hover:border-blue-200 transition-colors">
+                      Ver
+                    </button>
+                  </td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+
+          <div class="p-3.5 border-t border-slate-100 bg-slate-50 flex items-center justify-between text-xs text-slate-500 font-medium">
+            <span>Mostrando 4 de 28 campañas registradas</span>
+            <a href="#" class="text-cpce-blue hover:text-cpce-dark font-semibold transition-colors">Ver todas las simulaciones →</a>
+          </div>
+        </div>
+
+        <!-- Columna Derecha: Riesgo por Departamento & Quiz -->
+        <div class="space-y-6">
+          
+          <!-- Card de Riesgo por Departamento -->
+          <div class="p-5 bg-white rounded-xl border border-slate-200/90 shadow-sm space-y-4">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+              <h3 class="text-sm font-bold text-slate-900 tracking-tight">Vulnerabilidad por Área</h3>
+              <span class="text-[11px] text-slate-500 font-medium">% clics trampa</span>
+            </div>
+
+            <div class="space-y-3.5 text-xs">
+              <!-- Área 1 -->
+              <div>
+                <div class="flex justify-between text-slate-700 mb-1 font-medium">
+                  <span>Administración & Finanzas</span>
+                  <span class="font-bold text-cpce-red">18.4% (Crítico)</span>
+                </div>
+                <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden border border-slate-200">
+                  <div class="bg-cpce-red h-2 rounded-full" style="width: 18.4%"></div>
+                </div>
+              </div>
+
+              <!-- Área 2 -->
+              <div>
+                <div class="flex justify-between text-slate-700 mb-1 font-medium">
+                  <span>Recursos Humanos</span>
+                  <span class="font-bold text-amber-600">12.1% (Moderado)</span>
+                </div>
+                <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden border border-slate-200">
+                  <div class="bg-amber-500 h-2 rounded-full" style="width: 12.1%"></div>
+                </div>
+              </div>
+
+              <!-- Área 3 -->
+              <div>
+                <div class="flex justify-between text-slate-700 mb-1 font-medium">
+                  <span>Matriculación & Socios</span>
+                  <span class="font-bold text-amber-600">9.5% (Moderado)</span>
+                </div>
+                <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden border border-slate-200">
+                  <div class="bg-amber-400 h-2 rounded-full" style="width: 9.5%"></div>
+                </div>
+              </div>
+
+              <!-- Área 4 -->
+              <div>
+                <div class="flex justify-between text-slate-700 mb-1 font-medium">
+                  <span>Sistemas & Ciberseguridad</span>
+                  <span class="font-bold text-emerald-600">2.1% (Resiliente)</span>
+                </div>
+                <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden border border-slate-200">
+                  <div class="bg-emerald-500 h-2 rounded-full" style="width: 2.1%"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+              <span>Umbral seguro: &lt; 5.0%</span>
+              <span class="text-cpce-blue font-semibold">Refuerzo sugerido: Finanzas</span>
+            </div>
+          </div>
+
+          <!-- Card de Quiz de Concientización -->
+          <div class="p-5 bg-white rounded-xl border border-slate-200/90 shadow-sm space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-bold text-slate-900 tracking-tight">Capacitación y Quiz</h3>
+              <div class="w-7 h-7 rounded-lg bg-blue-50 text-cpce-blue flex items-center justify-center border border-blue-100">
+                <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
+              </div>
+            </div>
+            <p class="text-xs text-slate-500 leading-relaxed">
+              Los usuarios que interactúan con el enlace trampa son derivados inmediatamente al módulo interactivo para aprender a identificar el vector.
+            </p>
+            <div class="grid grid-cols-2 gap-2 pt-2 text-center">
+              <div class="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                <p class="text-xl font-extrabold text-slate-800">472</p>
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-0.5">Asignados</p>
+              </div>
+              <div class="p-3 rounded-lg bg-emerald-50 border border-emerald-200">
+                <p class="text-xl font-extrabold text-emerald-700">388</p>
+                <p class="text-[10px] font-bold text-emerald-600 uppercase tracking-wider mt-0.5">Aprobados</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    // Inicializar iconos Lucide
+    lucide.createIcons();
+
+    // Filtro interactivo de campañas
+    function filterCampaigns(status) {
+      const rows = document.querySelectorAll('.campaign-row');
+      const buttons = document.querySelectorAll('.filter-btn');
+
+      buttons.forEach(btn => {
+        btn.classList.remove('bg-cpce-blue', 'text-white', 'shadow-xs');
+        btn.classList.add('text-slate-600');
+      });
+
+      event.target.classList.remove('text-slate-600');
+      event.target.classList.add('bg-cpce-blue', 'text-white', 'shadow-xs');
+
+      rows.forEach(row => {
+        if (status === 'all' || row.dataset.status === status) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+
+    // Buscador en tiempo real
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+      const term = e.target.value.toLowerCase();
+      const rows = document.querySelectorAll('.campaign-row');
+      rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        row.style.display = text.includes(term) ? '' : 'none';
+      });
+    });
+  </script>
+</body>
+</html>
